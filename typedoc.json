@@ -1,0 +1,6 @@
+{
+  "entryPoints": ["src/mod.ts", "src/api/mod.ts"],
+  "name": "Unbundle",
+  "out": "./target/typedoc",
+  "tsconfig": "tsconfig.json"
+}
