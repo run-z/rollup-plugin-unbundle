@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "moduleResolution": "Node",
-    "module": "ES2015",
+    "module": "ES2022",
     "target": "ES2022",
     "strict": true,
     "noFallthroughCasesInSwitch": true,

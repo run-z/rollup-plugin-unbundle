@@ -17,7 +17,9 @@
     "url": "https://github.com/run-z/rollup-plugin-unbundle/issues"
   },
   "type": "module",
-  "main": "./dist/unbundle.plugin.cjs",
+  "engines": {
+    "node": ">=16.15"
+  },
   "types": "./dist/unbundle.plugin.d.ts",
   "exports": {
     "types": "./dist/unbundle.plugin.d.ts",
@@ -35,6 +37,7 @@
     "@types/is-glob": "^4.0.2",
     "@types/micromatch": "^4.0.2",
     "@types/node": "^18.11.18",
+    "@types/semver": "^7.3.13",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "eslint": "^8.31.0",
@@ -66,5 +69,8 @@
     "lint": "run-z +z --then eslint .",
     "test": "run-z +z env:NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" --then jest",
     "z": "run-z +cmd:rollup,+cmd:eslint,+cmd:jest +dts,+cmd:eslint,+cmd:jest"
+  },
+  "dependencies": {
+    "semver": "^7.3.8"
   }
 }
