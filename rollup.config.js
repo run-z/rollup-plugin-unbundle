@@ -16,7 +16,7 @@ const externals = new Set([
 export default defineConfig({
   input: {
     'unbundle.api': './src/api/mod.ts',
-    'unbundle.plugin': './src/mod.ts',
+    'unbundle.plugin': './src/plugin.ts',
   },
   plugins: [
     ts({
@@ -58,6 +58,7 @@ export default defineConfig({
               file: './dist/unbundle.api.d.ts',
             },
           },
+          internal: ['**/*.impl.ts', '**/impl/**'],
         }),
       ],
     },

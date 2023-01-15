@@ -6,11 +6,11 @@ import { IsRollupExternalImport } from './api/is-rollup-external-import.js';
 import { updateExternal } from './impl/update-external.js';
 
 /**
- * Creates unbundle plugin.
+ * Creates unbundle Rollup plugin.
  *
- * @returns New Plugin instance.
+ * @returns New plugin instance.
  */
-export default function unbundlePlugin(): Plugin {
+export default function unbundle(): Plugin {
   return {
     name: 'unbundle',
     options(this: MinimalPluginContext, options: InputOptions): InputOptions {
