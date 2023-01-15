@@ -2,15 +2,15 @@ import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 import { ImportResolver } from '../impl/import-resolver.js';
 import { Package$Resolution } from '../impl/package.resolution.js';
-import { ModuleResolution } from './module-resolution.js';
+import { ImportResolution } from './import-resolution.js';
 import { PackageJson } from './package-json.js';
 
 /**
- * Imported NodeJS package {@link ModuleResolution resolution}.
+ * Imported NodeJS package {@link ImportResolution resolution}.
  *
  * The package is a directory with `package.json` file.
  */
-export interface PackageResolution extends ModuleResolution {
+export interface PackageResolution extends ImportResolution {
   /**
    * File URL of {@link dir root package directory}.
    */
@@ -57,7 +57,7 @@ export interface PackageResolution extends ModuleResolution {
    *
    * @returns Either kind of dependency, or `false` if this package does not depend on `another` one.
    */
-  dependsOn(another: ModuleResolution): ModuleResolution.DependencyKind | false;
+  dependsOn(another: ImportResolution): ImportResolution.DependencyKind | false;
 
   toPackageResolution(): this;
 }

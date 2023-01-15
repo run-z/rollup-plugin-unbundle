@@ -1,9 +1,9 @@
+import { ImportResolution } from '../api/import-resolution.js';
 import { parseImportSpecifier } from '../api/import-specifier.js';
-import { ModuleResolution } from '../api/module-resolution.js';
 import { ImportResolver } from './import-resolver.js';
-import { Module$Resolution } from './module.resolution.js';
+import { Import$Resolution } from './import.resolution.js';
 
-export class Unknown$Resolution extends Module$Resolution {
+export class Unknown$Resolution extends Import$Resolution {
 
   readonly #resolver: ImportResolver;
 
@@ -12,7 +12,7 @@ export class Unknown$Resolution extends Module$Resolution {
     this.#resolver = resolver;
   }
 
-  override resolveImport(spec: string): ModuleResolution {
+  override resolveImport(spec: string): ImportResolution {
     return this.#resolver.resolve(parseImportSpecifier(spec));
   }
 

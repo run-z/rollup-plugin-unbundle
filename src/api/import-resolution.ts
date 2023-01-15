@@ -3,15 +3,15 @@ import { PackageResolution } from './package-resolution.js';
 /**
  * Imported module resolution.
  *
- * May represent imported package, internal Rollup module, or just an import URI.
+ * May represent imported package, virtual Rollup module, some import URI, or anything else.
  */
-export interface ModuleResolution {
+export interface ImportResolution {
   /**
    * Root module resolution.
    *
-   * This is typically a package created by {@link resolveRootPackage} function.
+   * This is typically a package resolution created by {@link resolveRootPackage} function.
    */
-  get root(): ModuleResolution;
+  get root(): ImportResolution;
 
   /**
    * Unique URI of imported module.
@@ -25,7 +25,7 @@ export interface ModuleResolution {
    *
    * @returns Imported module resolution.
    */
-  resolveImport(spec: string): ModuleResolution;
+  resolveImport(spec: string): ImportResolution;
 
   /**
    * Represents this module resolution as package resolution, if possible.
@@ -35,7 +35,7 @@ export interface ModuleResolution {
   asPackageResolution(): PackageResolution | undefined;
 }
 
-export namespace ModuleResolution {
+export namespace ImportResolution {
   /**
    * Kind of module dependency.
    *

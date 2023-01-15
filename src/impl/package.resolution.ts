@@ -3,14 +3,14 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import semver from 'semver';
+import { ImportResolution } from '../api/import-resolution.js';
 import { ImportSpecifier, parseImportSpecifier } from '../api/import-specifier.js';
-import { ModuleResolution } from '../api/module-resolution.js';
 import { PackageJson } from '../api/package-json.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { ImportResolver } from './import-resolver.js';
-import { Module$Resolution } from './module.resolution.js';
+import { Import$Resolution } from './import.resolution.js';
 
-export class Package$Resolution extends Module$Resolution implements PackageResolution {
+export class Package$Resolution extends Import$Resolution implements PackageResolution {
 
   readonly #resolver: ImportResolver;
   readonly #dir: string;
@@ -69,7 +69,7 @@ export class Package$Resolution extends Module$Resolution implements PackageReso
     return this.packageJson.version;
   }
 
-  override resolveImport(spec: string): ModuleResolution {
+  override resolveImport(spec: string): ImportResolution {
     const parsedSpec = parseImportSpecifier(spec);
 
     switch (parsedSpec.kind) {
@@ -89,21 +89,21 @@ export class Package$Resolution extends Module$Resolution implements PackageReso
     }
   }
 
-  #resolveFileImport(path: string): ModuleResolution {
+  #resolveFileImport(path: string): ImportResolution {
     const uri = new URL(path, this.uri).href as `file:///${string}`;
 
     return this.#resolver.resolveURI(uri, () => this.#discoverPackage(uri));
   }
 
-  #resolvePackage(name: string): ModuleResolution {
+  #resolvePackage(name: string): ImportResolution {
     return this.#resolver.resolveName(name, '*', () => this.#resolveDep(name));
   }
 
-  #discoverPackage(uri: string): ModuleResolution | undefined {
+  #discoverPackage(uri: string): ImportResolution | undefined {
     return this.#findPackageInDir(path.dirname(fileURLToPath(uri)));
   }
 
-  #findPackageInDir(dir: string): ModuleResolution | undefined {
+  #findPackageInDir(dir: string): ImportResolution | undefined {
     const packageJson = this.#hasNodeModules(dir) && this.#loadPackageJson(dir);
 
     if (packageJson) {
@@ -160,7 +160,7 @@ export class Package$Resolution extends Module$Resolution implements PackageReso
     return this;
   }
 
-  dependsOn(another: ModuleResolution): ModuleResolution.DependencyKind | false {
+  dependsOn(another: ImportResolution): ImportResolution.DependencyKind | false {
     const pkg = another.asPackageResolution();
 
     if (!pkg) {
@@ -201,8 +201,8 @@ export class Package$Resolution extends Module$Resolution implements PackageReso
   #establishDep(
     pkg: PackageResolution,
     dependencies: PackageJson.Dependencies | undefined,
-    kind: ModuleResolution.DependencyKind,
-  ): ModuleResolution.DependencyKind | false {
+    kind: ImportResolution.DependencyKind,
+  ): ImportResolution.DependencyKind | false {
     if (!dependencies) {
       return false;
     }
@@ -242,7 +242,7 @@ export class Package$Resolution extends Module$Resolution implements PackageReso
   #hasTransientDep(
     pkg: PackageResolution,
     dependencies: PackageJson.Dependencies | undefined,
-  ): ModuleResolution.DependencyKind | false {
+  ): ImportResolution.DependencyKind | false {
     if (!dependencies) {
       return false;
     }
@@ -275,7 +275,7 @@ export interface Package$Resolution extends PackageResolution {
 }
 
 interface PackageDep {
-  readonly kind: ModuleResolution.DependencyKind;
+  readonly kind: ImportResolution.DependencyKind;
   readonly range: string;
   readonly pkg: PackageResolution;
 }

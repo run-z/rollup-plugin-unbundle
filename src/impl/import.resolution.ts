@@ -1,8 +1,8 @@
-import { ModuleResolution } from '../api/module-resolution.js';
+import { ImportResolution } from '../api/import-resolution.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { ImportResolver } from './import-resolver.js';
 
-export abstract class Module$Resolution implements ModuleResolution {
+export abstract class Import$Resolution implements ImportResolution {
 
   readonly #resolver: ImportResolver;
   readonly #uri: string;
@@ -12,7 +12,7 @@ export abstract class Module$Resolution implements ModuleResolution {
     this.#uri = uri;
   }
 
-  get root(): ModuleResolution {
+  get root(): ImportResolution {
     return this.#resolver.root;
   }
 
@@ -20,7 +20,7 @@ export abstract class Module$Resolution implements ModuleResolution {
     return this.#uri;
   }
 
-  abstract resolveImport(spec: string): ModuleResolution;
+  abstract resolveImport(spec: string): ImportResolution;
 
   asPackageResolution(): PackageResolution | undefined {
     return;

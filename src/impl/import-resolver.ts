@@ -1,28 +1,28 @@
 import semver from 'semver';
+import { ImportResolution } from '../api/import-resolution.js';
 import { ImportSpecifier } from '../api/import-specifier.js';
-import { ModuleResolution } from '../api/module-resolution.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { Unknown$Resolution } from './unknown.resolution.js';
 import { URI$Resolution } from './uri.resolution.js';
 
 export class ImportResolver {
 
-  readonly #root: ModuleResolution;
-  readonly #byURI = new Map<string, ModuleResolution>();
+  readonly #root: ImportResolution;
+  readonly #byURI = new Map<string, ImportResolution>();
   readonly #byName = new Map<string, PackageResolution[]>();
 
-  constructor(createRoot: (resolver: ImportResolver) => ModuleResolution) {
+  constructor(createRoot: (resolver: ImportResolver) => ImportResolution) {
     this.#root = createRoot(this);
   }
 
-  get root(): ModuleResolution {
+  get root(): ImportResolution {
     return this.#root;
   }
 
   resolve(
     spec: ImportSpecifier,
-    createResolution?: () => ModuleResolution | undefined,
-  ): ModuleResolution {
+    createResolution?: () => ImportResolution | undefined,
+  ): ImportResolution {
     if (spec.kind === 'uri') {
       return this.resolveURI(spec.spec, createResolution);
     }
@@ -30,7 +30,7 @@ export class ImportResolver {
     return this.#addResolution(createResolution?.() ?? this.#createDefaultResolution(spec));
   }
 
-  #createDefaultResolution(spec: ImportSpecifier): ModuleResolution {
+  #createDefaultResolution(spec: ImportSpecifier): ImportResolution {
     switch (spec.kind) {
       case 'uri':
         return this.resolveURI(spec.spec);
@@ -49,7 +49,7 @@ export class ImportResolver {
     }
   }
 
-  resolveURI(uri: string, createResolution?: () => ModuleResolution | undefined): ModuleResolution {
+  resolveURI(uri: string, createResolution?: () => ImportResolution | undefined): ImportResolution {
     return (
       this.#byURI.get(uri)
       ?? this.#addResolution(createResolution?.() ?? new URI$Resolution(this, uri), uri)
@@ -82,7 +82,7 @@ export class ImportResolver {
     return resolvePackage && this.#addResolution(resolvePackage());
   }
 
-  #addResolution<T extends ModuleResolution>(resolution: T, uri = resolution.uri): T {
+  #addResolution<T extends ImportResolution>(resolution: T, uri = resolution.uri): T {
     this.#byURI.set(uri, resolution);
 
     if (uri === resolution.uri) {

@@ -1,9 +1,9 @@
+import { ImportResolution } from '../api/import-resolution.js';
 import { parseImportSpecifier } from '../api/import-specifier.js';
-import { ModuleResolution } from '../api/module-resolution.js';
 import { ImportResolver } from './import-resolver.js';
-import { Module$Resolution } from './module.resolution.js';
+import { Import$Resolution } from './import.resolution.js';
 
-export class URI$Resolution extends Module$Resolution {
+export class URI$Resolution extends Import$Resolution {
 
   readonly #resolver: ImportResolver;
 
@@ -12,7 +12,7 @@ export class URI$Resolution extends Module$Resolution {
     this.#resolver = resolver;
   }
 
-  override resolveImport(spec: string): ModuleResolution {
+  override resolveImport(spec: string): ImportResolution {
     const parsedSpec = parseImportSpecifier(spec);
 
     switch (parsedSpec.kind) {
@@ -24,7 +24,7 @@ export class URI$Resolution extends Module$Resolution {
     }
   }
 
-  #resolveURIImport(uri: string): ModuleResolution {
+  #resolveURIImport(uri: string): ImportResolution {
     const url = new URL(uri, this.uri).href;
 
     return this.#resolver.resolveURI(url);
