@@ -201,7 +201,7 @@ function isRelativeImport(spec: string): spec is '.' | '..' | `./${string}` | `.
   return spec.startsWith('./') || spec.startsWith('../') || spec === '.' || spec === '..';
 }
 
-const URI_PATTERN = /^(?:([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(?:\?(?:[^#]*))?(?:#(?:.*))?/;
+const URI_PATTERN = /^(?:([^:/?#]+):)(?:\/\/(?:[^/?#]*))?([^?#]*)(?:\?(?:[^#]*))?(?:#(?:.*))?/;
 
 export function parseImportURI(spec: string): ImportSpecifier.URI | undefined {
   const match = URI_PATTERN.exec(spec);
@@ -213,8 +213,8 @@ export function parseImportURI(spec: string): ImportSpecifier.URI | undefined {
   return {
     kind: 'uri',
     spec,
-    scheme: spec[1],
-    path: spec[2],
+    scheme: match[1],
+    path: match[2],
   };
 }
 
@@ -238,16 +238,16 @@ function parsePackageImport(spec: string, scope?: `@${string}`): ImportSpecifier
 
   const nameEnd = spec.indexOf('/');
 
-  if (nameEnd) {
+  if (nameEnd < 0) {
+    local = spec;
+  } else {
     local = spec.slice(0, nameEnd);
     subpath = spec.slice(nameEnd) as `/${string}`;
-  } else {
-    local = spec;
   }
 
   return {
     kind: 'package',
-    spec,
+    spec: scope ? `${scope}/${spec}` : spec,
     name: scope ? `${scope}/${local}` : local,
     scope,
     local,
