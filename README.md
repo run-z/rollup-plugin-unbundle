@@ -62,6 +62,9 @@ export default {
 
       These can be package names, even though they are not necessarily listed
       in `package.json`.
+
+      If you provide a function instead, make sure it returns `null`
+      or `undefined` to allow plugin to decide.
     */
   ],
   output: {
