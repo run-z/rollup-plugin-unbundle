@@ -1,23 +1,38 @@
-import { ImportResolver } from '../api/import-resolver.js';
 import { isNodeJSBuiltin } from '../api/is-nodejs-builtin.js';
 import { IsRollupExternalImport } from '../api/is-rollup-external-import.js';
+import { resolveRootPackage } from '../api/package-resolution.js';
 
 export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExternalImport {
-  const resolver = new ImportResolver();
+  const root = resolveRootPackage();
 
   return function isExternalOrBundled(source, importer, isResolved) {
     if (isNodeJSBuiltin(source)) {
       return true;
     }
 
-    const packageInfo = resolver.resolveImport(source, importer);
-    const resolution = isExternal(source, importer, isResolved);
+    const customRelation = isExternal(source, importer, isResolved);
 
-    if (resolution != null || packageInfo == null) {
-      return resolution;
+    if (customRelation != null) {
+      return customRelation;
     }
 
-    // Try second time with package name.
-    return isExternal(packageInfo.name, importer, false);
+    const base = importer ? root.resolveImport(importer) : root;
+    const resolution = base.resolveImport(source);
+    const packageResolution = resolution.asPackageResolution();
+
+    if (packageResolution && source !== packageResolution.name) {
+      // Try second time with package name.
+      const packageRelation = isExternal(packageResolution.name, importer, false);
+
+      if (packageRelation != null) {
+        return packageRelation;
+      }
+    }
+
+    const relation = root.dependsOn(resolution);
+
+    // Externalize runtime and peer dependencies.
+    // Bundle only development and unexpected dependencies.
+    return relation === true || relation === 'peer';
   };
 }
