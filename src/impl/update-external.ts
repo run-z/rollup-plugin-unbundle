@@ -10,10 +10,10 @@ export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExte
       return true;
     }
 
-    const customRelation = isExternal(source, importer, isResolved);
+    const initiallyExternal = isExternal(source, importer, isResolved);
 
-    if (customRelation != null) {
-      return customRelation;
+    if (initiallyExternal != null) {
+      return initiallyExternal;
     }
 
     const base = importer ? root.resolveImport(importer) : root;
@@ -22,17 +22,17 @@ export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExte
 
     if (packageResolution && source !== packageResolution.name) {
       // Try second time with package name.
-      const packageRelation = isExternal(packageResolution.name, importer, false);
+      const externalPackage = isExternal(packageResolution.name, importer, false);
 
-      if (packageRelation != null) {
-        return packageRelation;
+      if (externalPackage != null) {
+        return externalPackage;
       }
     }
 
-    const relation = root.dependsOn(resolution);
+    const dependencyKind = root.dependsOn(resolution);
 
     // Externalize runtime and peer dependencies.
     // Bundle only development and unexpected dependencies.
-    return relation === true || relation === 'peer';
+    return dependencyKind === true || dependencyKind === 'peer';
   };
 }
