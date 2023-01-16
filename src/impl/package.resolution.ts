@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import semver from 'semver';
+import { ImportDependency } from '../api/import-dependency.js';
 import { ImportResolution } from '../api/import-resolution.js';
 import { ImportSpecifier, parseImportSpecifier } from '../api/import-specifier.js';
 import { PackageJson } from '../api/package-json.js';
@@ -160,11 +161,17 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     return this;
   }
 
-  dependsOn(another: ImportResolution): ImportResolution.DependencyKind | false {
+  override dependsOn(another: ImportResolution): ImportDependency | null {
+    const importDependency = super.dependsOn(another);
+
+    if (importDependency) {
+      return importDependency;
+    }
+
     const pkg = another.asPackageResolution();
 
     if (!pkg) {
-      return false;
+      return null;
     }
 
     const { name, version } = pkg;
@@ -177,34 +184,34 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
         const match = deps.find(({ range }) => semver.satisfies(version, range));
 
         if (match) {
-          return match.kind;
+          return { kind: match.kind };
         }
       } else if (deps != null) {
-        return false;
+        return null;
       }
     }
 
     const { dependencies, devDependencies, peerDependencies } = this.packageJson;
 
-    const depends =
-      this.#establishDep(pkg, dependencies, true)
+    const dependency =
+      this.#establishDep(pkg, dependencies, 'runtime')
       || this.#establishDep(pkg, peerDependencies, 'peer')
       || this.#establishDep(pkg, devDependencies, 'dev');
 
-    if (!depends) {
+    if (!dependency) {
       this.#saveDep(pkg, false);
     }
 
-    return depends;
+    return dependency;
   }
 
   #establishDep(
     pkg: PackageResolution,
     dependencies: PackageJson.Dependencies | undefined,
-    kind: ImportResolution.DependencyKind,
-  ): ImportResolution.DependencyKind | false {
+    kind: ImportDependency['kind'],
+  ): ImportDependency | null {
     if (!dependencies) {
-      return false;
+      return null;
     }
 
     const { name, version } = pkg;
@@ -212,13 +219,13 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
 
     if (!range || !semver.satisfies(version, range)) {
       if (!this.#hasTransientDep(pkg, dependencies)) {
-        return false;
+        return null;
       }
     }
 
-    this.#saveDep(pkg, { kind, range, pkg });
+    this.#saveDep(pkg, { kind, range, target: pkg });
 
-    return kind;
+    return { kind };
   }
 
   #saveDep({ name, version }: PackageResolution, dep: PackageDep | false): void {
@@ -242,22 +249,22 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
   #hasTransientDep(
     pkg: PackageResolution,
     dependencies: PackageJson.Dependencies | undefined,
-  ): ImportResolution.DependencyKind | false {
+  ): ImportDependency | null {
     if (!dependencies) {
-      return false;
+      return null;
     }
 
     for (const [depName, depRange] of Object.entries(dependencies)) {
-      const depends = this.#resolver
+      const dependency = this.#resolver
         .resolveName(depName, depRange, () => this.#resolveDep(depName))
         .dependsOn(pkg);
 
-      if (depends) {
-        return depends;
+      if (dependency) {
+        return dependency;
       }
     }
 
-    return false;
+    return null;
   }
 
   #resolveDep(depName: string): PackageResolution {
@@ -274,8 +281,7 @@ export interface Package$Resolution extends PackageResolution {
   get uri(): `file:///${string}`;
 }
 
-interface PackageDep {
-  readonly kind: ImportResolution.DependencyKind;
+interface PackageDep extends ImportDependency {
   readonly range: string;
-  readonly pkg: PackageResolution;
+  readonly target: PackageResolution;
 }

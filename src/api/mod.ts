@@ -1,6 +1,7 @@
 /**
  * @module rollup-plugin-unbundle/api
  */
+export * from './import-dependency.js';
 export * from './import-resolution.js';
 export * from './import-specifier.js';
 export * from './is-nodejs-builtin.js';

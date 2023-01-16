@@ -29,10 +29,18 @@ export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExte
       }
     }
 
-    const dependencyKind = root.dependsOn(resolution);
+    const dependency = root.dependsOn(resolution);
+
+    if (!dependency) {
+      // Something imported, but no dependency declared.
+      // Externalize it.
+      return true;
+    }
+
+    const { kind } = dependency;
 
     // Externalize runtime and peer dependencies.
-    // Bundle only development and unexpected dependencies.
-    return dependencyKind === true || dependencyKind === 'peer';
+    // Bundle development and sub-module dependencies.
+    return kind === 'runtime' || kind === 'peer';
   };
 }

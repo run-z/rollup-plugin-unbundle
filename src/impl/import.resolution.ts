@@ -1,3 +1,4 @@
+import { ImportDependency } from '../api/import-dependency.js';
 import { ImportResolution } from '../api/import-resolution.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { ImportResolver } from './import-resolver.js';
@@ -21,6 +22,16 @@ export abstract class Import$Resolution implements ImportResolution {
   }
 
   abstract resolveImport(spec: string): ImportResolution;
+
+  dependsOn(another: ImportResolution): ImportDependency | null {
+    if (another.uri === this.uri) {
+      return {
+        kind: 'self',
+      };
+    }
+
+    return null;
+  }
 
   asPackageResolution(): PackageResolution | undefined {
     return;

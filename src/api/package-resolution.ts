@@ -48,17 +48,6 @@ export interface PackageResolution extends ImportResolution {
    */
   get version(): string;
 
-  /**
-   * Checks whether the resolved package depend on `another` module.
-   *
-   * Follows transient dependencies.
-   *
-   * @param another - The package to check.
-   *
-   * @returns Either kind of dependency, or `false` if this package does not depend on `another` one.
-   */
-  dependsOn(another: ImportResolution): ImportResolution.DependencyKind | false;
-
   toPackageResolution(): this;
 }
 
