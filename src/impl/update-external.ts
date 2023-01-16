@@ -1,4 +1,3 @@
-import { isNodeJSBuiltin } from '../api/is-nodejs-builtin.js';
 import { IsRollupExternalImport } from '../api/is-rollup-external-import.js';
 import { resolveRootPackage } from '../api/package-resolution.js';
 
@@ -6,10 +5,6 @@ export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExte
   const root = resolveRootPackage();
 
   return function isExternalOrBundled(source, importer, isResolved) {
-    if (isNodeJSBuiltin(source)) {
-      return true;
-    }
-
     const initiallyExternal = isExternal(source, importer, isResolved);
 
     if (initiallyExternal != null) {
@@ -41,6 +36,6 @@ export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExte
 
     // Externalize runtime and peer dependencies.
     // Bundle development and sub-module dependencies.
-    return kind === 'runtime' || kind === 'peer';
+    return kind === 'implied' || kind === 'runtime' || kind === 'peer';
   };
 }

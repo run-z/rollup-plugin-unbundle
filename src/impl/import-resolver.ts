@@ -2,6 +2,7 @@ import semver from 'semver';
 import { ImportResolution } from '../api/import-resolution.js';
 import { Import } from '../api/import.js';
 import { PackageResolution } from '../api/package-resolution.js';
+import { Implied$Resolution } from './implied.resolution.js';
 import { Unknown$Resolution } from './unknown.resolution.js';
 import { URI$Resolution } from './uri.resolution.js';
 
@@ -31,6 +32,8 @@ export class ImportResolver {
     switch (spec.kind) {
       case 'uri':
         return this.resolveURI(spec.spec);
+      case 'env':
+        return new Implied$Resolution(this, `import:${spec.kind}:${spec.spec}`);
       case 'package':
       case 'path':
         return new Unknown$Resolution(this, `import:${spec.kind}:${spec.spec}`);

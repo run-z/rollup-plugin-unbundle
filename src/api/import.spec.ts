@@ -7,6 +7,55 @@ describe('recognizeImport', () => {
 
     expect(recognizeImport(spec)).toBe(spec);
   });
+
+  describe('node imports', () => {
+    it('recognized with "node:" prefix', () => {
+      expect(recognizeImport('node:fs')).toEqual({
+        kind: 'env',
+        spec: 'node:fs',
+        env: 'node',
+      });
+    });
+    it('recognizes built-in module name', () => {
+      expect(recognizeImport('fs')).toEqual({
+        kind: 'env',
+        spec: 'fs',
+        env: 'node',
+      });
+      expect(recognizeImport('path')).toEqual({
+        kind: 'env',
+        spec: 'path',
+        env: 'node',
+      });
+    });
+    it('recognizes sub-export of built-in module', () => {
+      expect(recognizeImport('fs/promises')).toEqual({
+        kind: 'env',
+        spec: 'fs/promises',
+        env: 'node',
+      });
+      expect(recognizeImport('stream/web')).toEqual({
+        kind: 'env',
+        spec: 'stream/web',
+        env: 'node',
+      });
+    });
+    it('does not recognize wrong node built-in with "node:" prefix', () => {
+      expect(recognizeImport('node:wrong-module')).toEqual({
+        kind: 'uri',
+        spec: 'node:wrong-module',
+        scheme: 'node',
+        path: 'wrong-module',
+      });
+      expect(recognizeImport('node:fs/wrong-sub-module')).toEqual({
+        kind: 'uri',
+        spec: 'node:fs/wrong-sub-module',
+        scheme: 'node',
+        path: 'fs/wrong-sub-module',
+      });
+    });
+  });
+
   it('recognizes scoped package', () => {
     const spec = '@test-scope/test-package';
 

@@ -194,9 +194,12 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     const { dependencies, devDependencies, peerDependencies } = this.packageJson;
 
     const dependency =
-      this.#establishDep(pkg, dependencies, 'runtime')
-      || this.#establishDep(pkg, peerDependencies, 'peer')
-      || this.#establishDep(pkg, devDependencies, 'dev');
+      this.#establishDirectDep(pkg, dependencies, 'runtime')
+      || this.#establishDirectDep(pkg, peerDependencies, 'peer')
+      || this.#establishDirectDep(pkg, devDependencies, 'dev')
+      || this.#establishTransientDep(pkg, dependencies, 'runtime')
+      || this.#establishTransientDep(pkg, peerDependencies, 'peer')
+      || this.#establishTransientDep(pkg, devDependencies, 'dev');
 
     if (!dependency) {
       this.#saveDep(pkg, false);
@@ -205,7 +208,7 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     return dependency;
   }
 
-  #establishDep(
+  #establishDirectDep(
     pkg: PackageResolution,
     dependencies: PackageJson.Dependencies | undefined,
     kind: DependencyResolution['kind'],
@@ -218,14 +221,36 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     const range = dependencies[name];
 
     if (!range || !semver.satisfies(version, range)) {
-      if (!this.#hasTransientDep(pkg, dependencies)) {
-        return null;
+      return null;
+    }
+
+    this.#saveDep(pkg, { kind, range, pkg });
+
+    return { kind };
+  }
+
+  #establishTransientDep(
+    pkg: PackageResolution,
+    dependencies: PackageJson.Dependencies | undefined,
+    kind: DependencyResolution['kind'],
+  ): DependencyResolution | null {
+    if (!dependencies) {
+      return null;
+    }
+
+    for (const [depName, range] of Object.entries(dependencies)) {
+      const dependency = this.#resolver
+        .resolveName(depName, range, () => this.#resolveDep(depName))
+        .resolveDependency(pkg);
+
+      if (dependency) {
+        this.#saveDep(pkg, { kind, range, pkg });
+
+        return dependency;
       }
     }
 
-    this.#saveDep(pkg, { kind, range, target: pkg });
-
-    return { kind };
+    return null;
   }
 
   #saveDep({ name, version }: PackageResolution, dep: PackageDep | false): void {
@@ -246,27 +271,6 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     }
   }
 
-  #hasTransientDep(
-    pkg: PackageResolution,
-    dependencies: PackageJson.Dependencies | undefined,
-  ): DependencyResolution | null {
-    if (!dependencies) {
-      return null;
-    }
-
-    for (const [depName, depRange] of Object.entries(dependencies)) {
-      const dependency = this.#resolver
-        .resolveName(depName, depRange, () => this.#resolveDep(depName))
-        .resolveDependency(pkg);
-
-      if (dependency) {
-        return dependency;
-      }
-    }
-
-    return null;
-  }
-
   #resolveDep(depName: string): PackageResolution {
     this.#requireModule ??= createRequire(this.uri);
 
@@ -279,9 +283,10 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
 
 export interface Package$Resolution extends PackageResolution {
   get uri(): `file:///${string}`;
+  asImpliedResolution(): undefined;
 }
 
 interface PackageDep extends DependencyResolution {
   readonly range: string;
-  readonly target: PackageResolution;
+  readonly pkg: PackageResolution;
 }

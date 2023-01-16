@@ -48,7 +48,9 @@ export interface PackageResolution extends ImportResolution {
    */
   get version(): string;
 
-  toPackageResolution(): this;
+  asPackageResolution(): this;
+
+  asImpliedResolution(): undefined;
 }
 
 /**

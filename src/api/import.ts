@@ -1,3 +1,5 @@
+import { builtinModules } from 'node:module';
+
 /**
  * Import statement specifier.
  *
@@ -5,6 +7,7 @@
  */
 export type Import =
   | Import.Package
+  | Import.Env
   | Import.URI
   | Import.Path
   | Import.Subpath
@@ -49,6 +52,27 @@ export namespace Import {
      * Includes leading slash.
      */
     readonly subpath: `/${string}` | undefined;
+  }
+
+  /**
+   * Execution environment import specifier.
+   */
+  export interface Env {
+    readonly kind: 'env';
+
+    /**
+     * Original import specifier.
+     */
+    readonly spec: string;
+
+    /**
+     * The name of the environment to import from.
+     *
+     * Can be anything, e.g. `node` or `browser`.
+     *
+     * Only `node` built-in imports {@link recognizeImport recognized} currently.
+     */
+    readonly env: string;
   }
 
   /**
@@ -176,7 +200,10 @@ export function recognizeImport(spec: Import | string): Import {
   }
 
   return (
-    IMPORT_SPEC_PARSERS[spec[0]]?.(spec) ?? recognizeImportURI(spec) ?? recognizePackageImport(spec)
+    IMPORT_SPEC_PARSERS[spec[0]]?.(spec)
+    ?? recognizeNodeImport(spec)
+    ?? recognizeImportURI(spec)
+    ?? recognizePackageImport(spec)
   );
 }
 
@@ -214,6 +241,24 @@ const IMPORT_SPEC_PARSERS: {
     spec,
   }),
 };
+
+function recognizeNodeImport(spec: string): Import.Env | undefined {
+  if (getNodeJSBuiltins().has(spec.startsWith('node:') ? spec.slice(5) : spec)) {
+    return {
+      kind: 'env',
+      spec,
+      env: 'node',
+    };
+  }
+
+  return;
+}
+
+function getNodeJSBuiltins(): ReadonlySet<string> {
+  return (nodeJSBuiltins ??= new Set(builtinModules));
+}
+
+let nodeJSBuiltins: Set<string> | undefined;
 
 function isRelativeImport(spec: string): spec is '.' | '..' | `./${string}` | `../${string}` {
   return spec.startsWith('./') || spec.startsWith('../') || spec === '.' || spec === '..';

@@ -12,7 +12,7 @@ package name. It is not so simple to decide whether the module should be externa
 
 **The solution.** This plugin does the following:
 
-- Externalizes Node.js built-ins unconditionally.
+- Externalizes Node.js built-ins.
 
 - Externalizes packages listed as [package dependencies].
 
@@ -63,8 +63,8 @@ export default {
       These can be package names, even though they are not necessarily listed
       in `package.json`.
 
-      If you provide a function instead, make sure it returns `null`
-      or `undefined` to allow plugin to decide.
+      If you provide a function instead, make it return `null` or `undefined`
+      to allow the plugin to decide.
     */
   ],
   output: {

@@ -1,4 +1,5 @@
 import { DependencyResolution } from '../api/dependency-resolution.js';
+import { ImpliedResolution } from '../api/implied-resolution.js';
 import { ImportResolution } from '../api/import-resolution.js';
 import { Import } from '../api/import.js';
 import { PackageResolution } from '../api/package-resolution.js';
@@ -30,11 +31,20 @@ export abstract class Import$Resolution implements ImportResolution {
         kind: 'self',
       };
     }
+    if (another.asImpliedResolution()) {
+      return {
+        kind: 'implied',
+      };
+    }
 
     return null;
   }
 
   asPackageResolution(): PackageResolution | undefined {
+    return;
+  }
+
+  asImpliedResolution(): ImpliedResolution | undefined {
     return;
   }
 

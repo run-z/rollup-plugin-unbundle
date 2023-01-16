@@ -16,6 +16,7 @@ describe('updateExternal', () => {
     expect(isExternal('internal-module', undefined, false)).toBe(false);
   });
   it('excludes nodejs built-ins', () => {
+    baseExternal = () => null;
     expect(isExternal('node:fs', undefined, false)).toBe(true);
   });
 });

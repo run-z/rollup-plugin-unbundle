@@ -7,10 +7,11 @@ export interface DependencyResolution {
    *
    * One of:
    *
-   * - 'self' for module dependency on itself or some of its sub-modules.
+   * - `self` for module dependency on itself or some of its sub-modules.
+   * - `implied` for dependency on {@link ImpliedResolution implied module}, such as Node.js built-in.
    * - `runtime` for runtime (production) dependency.
    * - `dev` for development dependency.
    * - `peer` for peer dependency.
    */
-  readonly kind: 'self' | 'runtime' | 'dev' | 'peer';
+  readonly kind: 'self' | 'implied' | 'runtime' | 'dev' | 'peer';
 }

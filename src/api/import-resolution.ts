@@ -1,4 +1,5 @@
 import { DependencyResolution } from './dependency-resolution.js';
+import { ImpliedResolution } from './implied-resolution.js';
 import { Import } from './import.js';
 import { PackageResolution } from './package-resolution.js';
 
@@ -46,4 +47,11 @@ export interface ImportResolution {
    * @returns `this` instance for package resolution, or `undefined` otherwise.
    */
   asPackageResolution(): PackageResolution | undefined;
+
+  /**
+   * Represents this module resolution as implied resolution, if possible.
+   *
+   * @returns `this` instance for package resolution, or `undefined` otherwise.
+   */
+  asImpliedResolution(): ImpliedResolution | undefined;
 }
