@@ -1,9 +1,11 @@
 import { IsRollupExternalImport } from '../api/is-rollup-external-import.js';
 import { resolveRootPackage } from '../api/package-resolution.js';
+import { UnbundleOptions } from '../unbundle-options.js';
 
-export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExternalImport {
-  const root = resolveRootPackage();
-
+export function updateExternal(
+  isExternal: IsRollupExternalImport,
+  { resolutionRoot = resolveRootPackage() }: UnbundleOptions = {},
+): IsRollupExternalImport {
   return function isExternalOrBundled(source, importer, isResolved) {
     const initiallyExternal = isExternal(source, importer, isResolved);
 
@@ -11,7 +13,7 @@ export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExte
       return initiallyExternal;
     }
 
-    const base = importer ? root.resolveImport(importer) : root;
+    const base = importer ? resolutionRoot.resolveImport(importer) : resolutionRoot;
     const resolution = base.resolveImport(source);
     const packageResolution = resolution.asPackageResolution();
 
@@ -24,7 +26,7 @@ export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExte
       }
     }
 
-    const dependency = root.resolveDependency(resolution);
+    const dependency = resolutionRoot.resolveDependency(resolution);
 
     if (!dependency) {
       // Something imported, but no dependency declared.
@@ -34,7 +36,7 @@ export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExte
 
     const { kind } = dependency;
 
-    // Externalize runtime and peer dependencies.
+    // Externalize implied, runtime and peer dependencies.
     // Bundle development and sub-module dependencies.
     return kind === 'implied' || kind === 'runtime' || kind === 'peer';
   };
