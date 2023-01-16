@@ -6,7 +6,7 @@ export function updateExternal(
   isExternal: IsRollupExternalImport,
   { resolutionRoot = resolveRootPackage() }: UnbundleOptions = {},
 ): IsRollupExternalImport {
-  return function isExternalOrBundled(source, importer, isResolved) {
+  return function isExternalOrBundled(source, importer, isResolved): boolean | undefined {
     const initiallyExternal = isExternal(source, importer, isResolved);
 
     if (initiallyExternal != null) {
@@ -35,6 +35,11 @@ export function updateExternal(
     }
 
     const { kind } = dependency;
+
+    if (kind === 'synthetic') {
+      // No decision on synthetic dependencies.
+      return;
+    }
 
     // Externalize implied, runtime and peer dependencies.
     // Bundle development and sub-module dependencies.

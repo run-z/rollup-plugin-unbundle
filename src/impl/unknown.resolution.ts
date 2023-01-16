@@ -3,12 +3,12 @@ import { Import, recognizeImport } from '../api/import.js';
 import { ImportResolver } from './import-resolver.js';
 import { Import$Resolution } from './import.resolution.js';
 
-export class Unknown$Resolution extends Import$Resolution {
+export class Unknown$Resolution extends Import$Resolution<Import> {
 
   readonly #resolver: ImportResolver;
 
-  constructor(resolver: ImportResolver, uri: string) {
-    super(resolver, uri);
+  constructor(resolver: ImportResolver, uri: string, importSpec: Import) {
+    super(resolver, uri, importSpec);
     this.#resolver = resolver;
   }
 

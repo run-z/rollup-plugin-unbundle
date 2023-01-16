@@ -7,11 +7,11 @@ import { builtinModules } from 'node:module';
  */
 export type Import =
   | Import.Package
-  | Import.Env
+  | Import.Implied
   | Import.URI
   | Import.Path
   | Import.Subpath
-  | Import.Virtual
+  | Import.Synthetic
   | Import.Unknown;
 
 export namespace Import {
@@ -55,10 +55,10 @@ export namespace Import {
   }
 
   /**
-   * Execution environment import specifier.
+   * Implied module import specifier, such as execution environment.
    */
-  export interface Env {
-    readonly kind: 'env';
+  export interface Implied {
+    readonly kind: 'implied';
 
     /**
      * Original import specifier.
@@ -66,13 +66,13 @@ export namespace Import {
     readonly spec: string;
 
     /**
-     * The name of the environment to import from.
+     * The source of implied dependency.
      *
      * Can be anything, e.g. `node` or `browser`.
      *
      * Only `node` built-in imports {@link recognizeImport recognized} currently.
      */
-    readonly env: string;
+    readonly from: string;
   }
 
   /**
@@ -149,12 +149,12 @@ export namespace Import {
   }
 
   /**
-   * Virtual module import specifier.
+   * Synthetic module import specifier.
    *
    * The module ID starting with _zero char_ (`U+0000`). Such IDs generated e.g. by Rollup plugins.
    */
-  export interface Virtual {
-    readonly kind: 'virtual';
+  export interface Synthetic {
+    readonly kind: 'synthetic';
 
     /**
      * Original import specifier. Always starts with zero char (`U+0000`).
@@ -211,7 +211,7 @@ const IMPORT_SPEC_PARSERS: {
   readonly [prefix: string]: ((spec: string) => Import) | undefined;
 } = {
   '\0': spec => ({
-    kind: 'virtual',
+    kind: 'synthetic',
     spec: spec as `\0${string}`,
   }),
   '#': spec => ({
@@ -242,12 +242,12 @@ const IMPORT_SPEC_PARSERS: {
   }),
 };
 
-function recognizeNodeImport(spec: string): Import.Env | undefined {
+function recognizeNodeImport(spec: string): Import.Implied | undefined {
   if (getNodeJSBuiltins().has(spec.startsWith('node:') ? spec.slice(5) : spec)) {
     return {
-      kind: 'env',
+      kind: 'implied',
       spec,
-      env: 'node',
+      from: 'node',
     };
   }
 

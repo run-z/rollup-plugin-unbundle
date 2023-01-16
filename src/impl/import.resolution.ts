@@ -1,18 +1,29 @@
 import { DependencyResolution } from '../api/dependency-resolution.js';
-import { ImpliedResolution } from '../api/implied-resolution.js';
 import { ImportResolution } from '../api/import-resolution.js';
 import { Import } from '../api/import.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { ImportResolver } from './import-resolver.js';
 
-export abstract class Import$Resolution implements ImportResolution {
+export abstract class Import$Resolution<TImport extends Import> implements ImportResolution {
 
   readonly #resolver: ImportResolver;
   readonly #uri: string;
+  #getImportSpec: () => TImport;
 
-  constructor(resolver: ImportResolver, uri: string) {
+  constructor(resolver: ImportResolver, uri: string, importSpec: TImport | (() => TImport)) {
     this.#resolver = resolver;
     this.#uri = uri;
+    if (typeof importSpec === 'function') {
+      this.#getImportSpec = () => {
+        const spec = importSpec();
+
+        this.#getImportSpec = () => spec;
+
+        return spec;
+      };
+    } else {
+      this.#getImportSpec = () => importSpec;
+    }
   }
 
   get root(): ImportResolution {
@@ -23,6 +34,10 @@ export abstract class Import$Resolution implements ImportResolution {
     return this.#uri;
   }
 
+  get importSpec(): TImport {
+    return this.#getImportSpec();
+  }
+
   abstract resolveImport(spec: Import | string): ImportResolution;
 
   resolveDependency(another: ImportResolution): DependencyResolution | null {
@@ -31,7 +46,12 @@ export abstract class Import$Resolution implements ImportResolution {
         kind: 'self',
       };
     }
-    if (another.asImpliedResolution()) {
+
+    const {
+      importSpec: { kind },
+    } = another;
+
+    if (kind === 'implied' || kind === 'synthetic') {
       return {
         kind: 'implied',
       };
@@ -41,10 +61,6 @@ export abstract class Import$Resolution implements ImportResolution {
   }
 
   asPackageResolution(): PackageResolution | undefined {
-    return;
-  }
-
-  asImpliedResolution(): ImpliedResolution | undefined {
     return;
   }
 

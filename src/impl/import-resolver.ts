@@ -2,7 +2,6 @@ import semver from 'semver';
 import { ImportResolution } from '../api/import-resolution.js';
 import { Import } from '../api/import.js';
 import { PackageResolution } from '../api/package-resolution.js';
-import { Implied$Resolution } from './implied.resolution.js';
 import { Unknown$Resolution } from './unknown.resolution.js';
 import { URI$Resolution } from './uri.resolution.js';
 
@@ -22,7 +21,7 @@ export class ImportResolver {
 
   resolve(spec: Import, createResolution?: () => ImportResolution | undefined): ImportResolution {
     if (spec.kind === 'uri') {
-      return this.resolveURI(spec.spec, createResolution);
+      return this.resolveURI(spec, createResolution);
     }
 
     return this.#addResolution(createResolution?.() ?? this.#createDefaultResolution(spec));
@@ -31,28 +30,37 @@ export class ImportResolver {
   #createDefaultResolution(spec: Import): ImportResolution {
     switch (spec.kind) {
       case 'uri':
-        return this.resolveURI(spec.spec);
-      case 'env':
-        return new Implied$Resolution(this, `import:${spec.kind}:${spec.spec}`);
+        return this.resolveURI(spec);
+      case 'implied':
       case 'package':
       case 'path':
-        return new Unknown$Resolution(this, `import:${spec.kind}:${spec.spec}`);
+        return new Unknown$Resolution(this, `import:${spec.kind}:${spec.spec}`, spec);
       case 'subpath':
-        return new Unknown$Resolution(this, `import:${spec.kind}:${spec.spec.slice(1)}`);
-      case 'virtual':
+        return new Unknown$Resolution(this, `import:${spec.kind}:${spec.spec.slice(1)}`, spec);
+      case 'synthetic':
         return new Unknown$Resolution(
           this,
           `import:${spec.kind}:${encodeURIComponent(spec.spec.slice(1))}`,
+          spec,
         );
       case 'unknown':
-        return new Unknown$Resolution(this, `import:${spec.kind}:${encodeURIComponent(spec.spec)}`);
+        return new Unknown$Resolution(
+          this,
+          `import:${spec.kind}:${encodeURIComponent(spec.spec)}`,
+          spec,
+        );
     }
   }
 
-  resolveURI(uri: string, createResolution?: () => ImportResolution | undefined): ImportResolution {
+  resolveURI(
+    spec: Import.URI,
+    createResolution?: () => ImportResolution | undefined,
+  ): ImportResolution {
+    const { spec: uri } = spec;
+
     return (
       this.#byURI.get(uri)
-      ?? this.#addResolution(createResolution?.() ?? new URI$Resolution(this, uri), uri)
+      ?? this.#addResolution(createResolution?.() ?? new URI$Resolution(this, spec), uri)
     );
   }
 

@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { ImportResolver } from '../impl/import-resolver.js';
 import { Package$Resolution } from '../impl/package.resolution.js';
 import { ImportResolution } from './import-resolution.js';
+import { Import } from './import.js';
 import { PackageJson } from './package-json.js';
 
 /**
@@ -15,6 +16,8 @@ export interface PackageResolution extends ImportResolution {
    * File URL of {@link dir root package directory}.
    */
   get uri(): `file:///${string}`;
+
+  get importSpec(): Import.Package;
 
   /**
    * Absolute path to root package directory.
@@ -49,8 +52,6 @@ export interface PackageResolution extends ImportResolution {
   get version(): string;
 
   asPackageResolution(): this;
-
-  asImpliedResolution(): undefined;
 }
 
 /**

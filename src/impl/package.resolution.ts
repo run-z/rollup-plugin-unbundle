@@ -10,18 +10,25 @@ import { PackageJson } from '../api/package-json.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { ImportResolver } from './import-resolver.js';
 import { Import$Resolution } from './import.resolution.js';
+import { urlToImport } from './url-to-import.js';
 
-export class Package$Resolution extends Import$Resolution implements PackageResolution {
+export class Package$Resolution
+  extends Import$Resolution<Import.Package>
+  implements PackageResolution {
 
   readonly #resolver: ImportResolver;
   readonly #dir: string;
   #packageJson: PackageJson | undefined;
-  #name?: Import.Package;
   readonly #dependencies = new Map<string, Map<string, false | PackageDep[]>>();
   #requireModule?: NodeRequire;
 
-  constructor(resolver: ImportResolver, uri: `file:///${string}`, packageJson?: PackageJson) {
-    super(resolver, uri);
+  constructor(
+    resolver: ImportResolver,
+    uri: `file:///${string}`,
+    importSpec?: Import.Package,
+    packageJson?: PackageJson,
+  ) {
+    super(resolver, uri, importSpec ?? (() => packageImportSpec(this)));
     this.#resolver = resolver;
     this.#dir = fileURLToPath(uri);
     this.#packageJson = packageJson;
@@ -45,25 +52,11 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
   }
 
   get scope(): string | undefined {
-    return this.#packageName.scope;
+    return this.importSpec.scope;
   }
 
   get localName(): string {
-    return this.#packageName.local;
-  }
-
-  get #packageName(): Import.Package {
-    if (this.#name) {
-      return this.#name;
-    }
-
-    const spec = recognizeImport(this.name);
-
-    if (spec.kind !== 'package') {
-      throw new TypeError(`Invalid package name: ${this.name}`);
-    }
-
-    return (this.#name = spec);
+    return this.importSpec.local;
   }
 
   get version(): string {
@@ -80,7 +73,7 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
         }
 
         // Unknown import URI.
-        return this.#resolver.resolveURI(spec.spec);
+        return this.#resolver.resolveURI(spec);
       case 'path':
         return this.#resolveFileImport(spec.spec);
       case 'package':
@@ -91,9 +84,9 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
   }
 
   #resolveFileImport(path: string): ImportResolution {
-    const uri = new URL(path, this.uri).href as `file:///${string}`;
+    const url = new URL(path, this.uri);
 
-    return this.#resolver.resolveURI(uri, () => this.#discoverPackage(uri));
+    return this.#resolver.resolveURI(urlToImport(url), () => this.#discoverPackage(url.href));
   }
 
   #resolvePackage(name: string): ImportResolution {
@@ -108,11 +101,16 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     const packageJson = this.#hasNodeModules(dir) && this.#loadPackageJson(dir);
 
     if (packageJson) {
-      const uri = pathToFileURL(dir).href as `file:///${string}`;
+      const dirURL = pathToFileURL(dir);
 
       return this.#resolver.resolveURI(
-        uri,
-        () => new Package$Resolution(this.#resolver, uri, packageJson),
+        urlToImport(dirURL),
+        () => new Package$Resolution(
+            this.#resolver,
+            dirURL.href as `file:///${string}`,
+            undefined,
+            packageJson,
+          ),
       );
     }
 
@@ -279,6 +277,23 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     return new Package$Resolution(this.#resolver, url as `file:///${string}`);
   }
 
+}
+
+function packageImportSpec({ packageJson: { name } }: PackageResolution): Import.Package {
+  const spec = recognizeImport(name);
+
+  if (spec.kind === 'package') {
+    return spec;
+  }
+
+  return {
+    kind: 'package',
+    spec: name,
+    name,
+    scope: undefined,
+    local: name,
+    subpath: undefined,
+  };
 }
 
 export interface Package$Resolution extends PackageResolution {

@@ -2,7 +2,6 @@
  * @module rollup-plugin-unbundle/api
  */
 export * from './dependency-resolution.js';
-export * from './implied-resolution.js';
 export * from './import-resolution.js';
 export * from './import.js';
 export * from './is-rollup-external-import.js';

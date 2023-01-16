@@ -1,5 +1,4 @@
 import { DependencyResolution } from './dependency-resolution.js';
-import { ImpliedResolution } from './implied-resolution.js';
 import { Import } from './import.js';
 import { PackageResolution } from './package-resolution.js';
 
@@ -15,6 +14,11 @@ export interface ImportResolution {
    * This is typically a package resolution created by {@link resolveRootPackage} function.
    */
   get root(): ImportResolution;
+
+  /**
+   * Resolved import specifier.
+   */
+  get importSpec(): Import;
 
   /**
    * Unique URI of imported module.
@@ -47,11 +51,4 @@ export interface ImportResolution {
    * @returns `this` instance for package resolution, or `undefined` otherwise.
    */
   asPackageResolution(): PackageResolution | undefined;
-
-  /**
-   * Represents this module resolution as implied resolution, if possible.
-   *
-   * @returns `this` instance for package resolution, or `undefined` otherwise.
-   */
-  asImpliedResolution(): ImpliedResolution | undefined;
 }
