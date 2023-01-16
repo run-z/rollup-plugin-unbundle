@@ -70,23 +70,23 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     return this.packageJson.version;
   }
 
-  override resolveImport(spec: string): ImportResolution {
-    const parsedSpec = recognizeImport(spec);
+  override resolveImport(spec: Import | string): ImportResolution {
+    spec = recognizeImport(spec);
 
-    switch (parsedSpec.kind) {
+    switch (spec.kind) {
       case 'uri':
-        if (parsedSpec.scheme === 'file') {
-          return this.#resolveFileImport(spec);
+        if (spec.scheme === 'file') {
+          return this.#resolveFileImport(spec.spec);
         }
 
         // Unknown import URI.
-        return this.#resolver.resolveURI(spec);
+        return this.#resolver.resolveURI(spec.spec);
       case 'path':
-        return this.#resolveFileImport(spec);
+        return this.#resolveFileImport(spec.spec);
       case 'package':
-        return this.#resolvePackage(parsedSpec.name);
+        return this.#resolvePackage(spec.name);
       default:
-        return this.#resolver.resolve(parsedSpec);
+        return this.#resolver.resolve(spec);
     }
   }
 

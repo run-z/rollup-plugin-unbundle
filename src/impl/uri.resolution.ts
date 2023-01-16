@@ -13,14 +13,14 @@ export class URI$Resolution extends Import$Resolution {
   }
 
   override resolveImport(spec: Import | string): ImportResolution {
-    const recognizedSpec = recognizeImport(spec);
+    spec = recognizeImport(spec);
 
-    switch (recognizedSpec.kind) {
+    switch (spec.kind) {
       case 'uri':
       case 'path':
-        return this.#resolveURIImport(recognizedSpec.spec);
+        return this.#resolveURIImport(spec.spec);
       default:
-        return this.#resolver.resolve(recognizedSpec);
+        return this.#resolver.resolve(spec);
     }
   }
 
