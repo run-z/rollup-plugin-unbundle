@@ -1,4 +1,5 @@
-import { ImportDependency } from './import-dependency.js';
+import { DependencyResolution } from './dependency-resolution.js';
+import { Import } from './import.js';
 import { PackageResolution } from './package-resolution.js';
 
 /**
@@ -22,22 +23,22 @@ export interface ImportResolution {
   /**
    * Resolves another module imported by this one.
    *
-   * @param spec - Imported module specifier.
+   * @param spec - Imported module specifier, either {@link recognizeImport recognized} or not.
    *
    * @returns Imported module resolution.
    */
-  resolveImport(spec: string): ImportResolution;
+  resolveImport(spec: Import | string): ImportResolution;
 
   /**
-   * Checks how the resolved module depend on `another` one.
+   * Resolves the dependency of the module on another one `another`.
    *
-   * Follows transient dependencies for packages.
+   * Follows transient when possible.
    *
    * @param another - The package to check.
    *
    * @returns Either dependency descriptor, or `null` if the module does not depend on `another` one.
    */
-  dependsOn(another: ImportResolution): ImportDependency | null;
+  resolveDependency(another: ImportResolution): DependencyResolution | null;
 
   /**
    * Represents this module resolution as package resolution, if possible.

@@ -1,6 +1,6 @@
 import semver from 'semver';
 import { ImportResolution } from '../api/import-resolution.js';
-import { ImportSpecifier } from '../api/import-specifier.js';
+import { Import } from '../api/import.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { Unknown$Resolution } from './unknown.resolution.js';
 import { URI$Resolution } from './uri.resolution.js';
@@ -19,10 +19,7 @@ export class ImportResolver {
     return this.#root;
   }
 
-  resolve(
-    spec: ImportSpecifier,
-    createResolution?: () => ImportResolution | undefined,
-  ): ImportResolution {
+  resolve(spec: Import, createResolution?: () => ImportResolution | undefined): ImportResolution {
     if (spec.kind === 'uri') {
       return this.resolveURI(spec.spec, createResolution);
     }
@@ -30,7 +27,7 @@ export class ImportResolver {
     return this.#addResolution(createResolution?.() ?? this.#createDefaultResolution(spec));
   }
 
-  #createDefaultResolution(spec: ImportSpecifier): ImportResolution {
+  #createDefaultResolution(spec: Import): ImportResolution {
     switch (spec.kind) {
       case 'uri':
         return this.resolveURI(spec.spec);

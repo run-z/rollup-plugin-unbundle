@@ -29,7 +29,7 @@ export function updateExternal(isExternal: IsRollupExternalImport): IsRollupExte
       }
     }
 
-    const dependency = root.dependsOn(resolution);
+    const dependency = root.resolveDependency(resolution);
 
     if (!dependency) {
       // Something imported, but no dependency declared.

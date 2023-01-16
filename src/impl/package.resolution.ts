@@ -3,9 +3,9 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import semver from 'semver';
-import { ImportDependency } from '../api/import-dependency.js';
+import { DependencyResolution } from '../api/dependency-resolution.js';
 import { ImportResolution } from '../api/import-resolution.js';
-import { ImportSpecifier, parseImportSpecifier } from '../api/import-specifier.js';
+import { Import, recognizeImport } from '../api/import.js';
 import { PackageJson } from '../api/package-json.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { ImportResolver } from './import-resolver.js';
@@ -16,7 +16,7 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
   readonly #resolver: ImportResolver;
   readonly #dir: string;
   #packageJson: PackageJson | undefined;
-  #name?: ImportSpecifier.Package;
+  #name?: Import.Package;
   readonly #dependencies = new Map<string, Map<string, false | PackageDep[]>>();
   #requireModule?: NodeRequire;
 
@@ -52,12 +52,12 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     return this.#packageName.local;
   }
 
-  get #packageName(): ImportSpecifier.Package {
+  get #packageName(): Import.Package {
     if (this.#name) {
       return this.#name;
     }
 
-    const spec = parseImportSpecifier(this.name);
+    const spec = recognizeImport(this.name);
 
     if (spec.kind !== 'package') {
       throw new TypeError(`Invalid package name: ${this.name}`);
@@ -71,7 +71,7 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
   }
 
   override resolveImport(spec: string): ImportResolution {
-    const parsedSpec = parseImportSpecifier(spec);
+    const parsedSpec = recognizeImport(spec);
 
     switch (parsedSpec.kind) {
       case 'uri':
@@ -161,8 +161,8 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     return this;
   }
 
-  override dependsOn(another: ImportResolution): ImportDependency | null {
-    const importDependency = super.dependsOn(another);
+  override resolveDependency(another: ImportResolution): DependencyResolution | null {
+    const importDependency = super.resolveDependency(another);
 
     if (importDependency) {
       return importDependency;
@@ -208,8 +208,8 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
   #establishDep(
     pkg: PackageResolution,
     dependencies: PackageJson.Dependencies | undefined,
-    kind: ImportDependency['kind'],
-  ): ImportDependency | null {
+    kind: DependencyResolution['kind'],
+  ): DependencyResolution | null {
     if (!dependencies) {
       return null;
     }
@@ -249,7 +249,7 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
   #hasTransientDep(
     pkg: PackageResolution,
     dependencies: PackageJson.Dependencies | undefined,
-  ): ImportDependency | null {
+  ): DependencyResolution | null {
     if (!dependencies) {
       return null;
     }
@@ -257,7 +257,7 @@ export class Package$Resolution extends Import$Resolution implements PackageReso
     for (const [depName, depRange] of Object.entries(dependencies)) {
       const dependency = this.#resolver
         .resolveName(depName, depRange, () => this.#resolveDep(depName))
-        .dependsOn(pkg);
+        .resolveDependency(pkg);
 
       if (dependency) {
         return dependency;
@@ -281,7 +281,7 @@ export interface Package$Resolution extends PackageResolution {
   get uri(): `file:///${string}`;
 }
 
-interface PackageDep extends ImportDependency {
+interface PackageDep extends DependencyResolution {
   readonly range: string;
   readonly target: PackageResolution;
 }

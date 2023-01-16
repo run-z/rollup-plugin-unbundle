@@ -1,17 +1,17 @@
 /**
- * Recognized import statement specifier.
+ * Import statement specifier.
  *
- * Several kinds of specifiers recognized by {@link parseImportSpecifier} function.
+ * Several kinds of specifiers recognized by {@link recognizeImport} function.
  */
-export type ImportSpecifier =
-  | ImportSpecifier.Package
-  | ImportSpecifier.URI
-  | ImportSpecifier.Path
-  | ImportSpecifier.Subpath
-  | ImportSpecifier.Virtual
-  | ImportSpecifier.Unknown;
+export type Import =
+  | Import.Package
+  | Import.URI
+  | Import.Path
+  | Import.Subpath
+  | Import.Virtual
+  | Import.Unknown;
 
-export namespace ImportSpecifier {
+export namespace Import {
   /**
    * Package import specifier.
    *
@@ -152,18 +152,36 @@ export namespace ImportSpecifier {
 }
 
 /**
- * Recognizes import specifier and tries to parse it accordingly.
+ * Recognizes import specifier.
  *
- * @param spec - Import specifier string to recognize.
+ * @typeParam TImport - Type of recognized import specifier.
+ * @param spec - Already recognized import specifier.
+ *
+ * @returns The unchanged specifier.
+ */
+export function recognizeImport<TImport extends Import>(spec: TImport): TImport;
+
+/**
+ * Recognizes import specifier and parses it accordingly.
+ *
+ * @param spec - Import specifier to recognize. May be recognized already.
  *
  * @returns Recognized import specifier.
  */
-export function parseImportSpecifier(spec: string): ImportSpecifier {
-  return IMPORT_SPEC_PARSERS[spec[0]]?.(spec) ?? parseImportURI(spec) ?? parsePackageImport(spec);
+export function recognizeImport(spec: Import | string): Import;
+
+export function recognizeImport(spec: Import | string): Import {
+  if (typeof spec !== 'string') {
+    return spec;
+  }
+
+  return (
+    IMPORT_SPEC_PARSERS[spec[0]]?.(spec) ?? recognizeImportURI(spec) ?? recognizePackageImport(spec)
+  );
 }
 
 const IMPORT_SPEC_PARSERS: {
-  readonly [prefix: string]: ((spec: string) => ImportSpecifier) | undefined;
+  readonly [prefix: string]: ((spec: string) => Import) | undefined;
 } = {
   '\0': spec => ({
     kind: 'virtual',
@@ -189,7 +207,7 @@ const IMPORT_SPEC_PARSERS: {
     isRelative: false,
     spec: spec as `/${string}`,
   }),
-  '@': parseScopedPackageImport,
+  '@': recognizeScopedPackageImport,
   _: spec => ({
     // Unscoped package name can not start with underscore
     kind: 'unknown',
@@ -203,7 +221,7 @@ function isRelativeImport(spec: string): spec is '.' | '..' | `./${string}` | `.
 
 const URI_PATTERN = /^(?:([^:/?#]+):)(?:\/\/(?:[^/?#]*))?([^?#]*)(?:\?(?:[^#]*))?(?:#(?:.*))?/;
 
-export function parseImportURI(spec: string): ImportSpecifier.URI | undefined {
+export function recognizeImportURI(spec: string): Import.URI | undefined {
   const match = URI_PATTERN.exec(spec);
 
   if (!match) {
@@ -218,11 +236,11 @@ export function parseImportURI(spec: string): ImportSpecifier.URI | undefined {
   };
 }
 
-function parseScopedPackageImport(spec: string): ImportSpecifier {
+function recognizeScopedPackageImport(spec: string): Import {
   const scopeEnd = spec.indexOf('/', 1);
 
   if (scopeEnd > 0) {
-    return parsePackageImport(spec.slice(scopeEnd + 1), spec.slice(0, scopeEnd) as `@${string}`);
+    return recognizePackageImport(spec, spec.slice(0, scopeEnd) as `@${string}`, scopeEnd + 1);
   }
 
   // Unscoped package name can not start with `@`.
@@ -232,23 +250,26 @@ function parseScopedPackageImport(spec: string): ImportSpecifier {
   };
 }
 
-function parsePackageImport(spec: string, scope?: `@${string}`): ImportSpecifier {
+function recognizePackageImport(spec: string, scope?: `@${string}`, localOffset = 0): Import {
   let local: string;
   let subpath: `/${string}` | undefined;
 
-  const nameEnd = spec.indexOf('/');
+  const nameEnd = spec.indexOf('/', localOffset);
+  let name: string;
 
   if (nameEnd < 0) {
-    local = spec;
+    local = spec.slice(localOffset);
+    name = spec;
   } else {
-    local = spec.slice(0, nameEnd);
+    local = spec.slice(localOffset, nameEnd);
+    name = spec.slice(0, nameEnd);
     subpath = spec.slice(nameEnd) as `/${string}`;
   }
 
   return {
     kind: 'package',
-    spec: scope ? `${scope}/${spec}` : spec,
-    name: scope ? `${scope}/${local}` : local,
+    spec,
+    name,
     scope,
     local,
     subpath,

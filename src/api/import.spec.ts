@@ -1,11 +1,16 @@
 import { describe, expect, it } from '@jest/globals';
-import { parseImportSpecifier } from './import-specifier.js';
+import { Import, recognizeImport } from './import.js';
 
-describe('parseImportSpecifier', () => {
+describe('recognizeImport', () => {
+  it('does not alter recognized import', () => {
+    const spec: Import = { kind: 'unknown', spec: '_path/to/file' };
+
+    expect(recognizeImport(spec)).toBe(spec);
+  });
   it('recognizes scoped package', () => {
     const spec = '@test-scope/test-package';
 
-    expect(parseImportSpecifier(spec)).toEqual({
+    expect(recognizeImport(spec)).toEqual({
       kind: 'package',
       spec,
       name: spec,
@@ -16,7 +21,7 @@ describe('parseImportSpecifier', () => {
   it('recognizes subpath of scoped package', () => {
     const spec = '@test-scope/test-package/some/path';
 
-    expect(parseImportSpecifier(spec)).toEqual({
+    expect(recognizeImport(spec)).toEqual({
       kind: 'package',
       spec,
       name: '@test-scope/test-package',
@@ -28,7 +33,7 @@ describe('parseImportSpecifier', () => {
   it('recognizes unscoped package', () => {
     const spec = 'test-package';
 
-    expect(parseImportSpecifier(spec)).toEqual({
+    expect(recognizeImport(spec)).toEqual({
       kind: 'package',
       spec,
       name: spec,
@@ -38,7 +43,7 @@ describe('parseImportSpecifier', () => {
   it('recognizes subpath of unscoped package', () => {
     const spec = 'test-package/some/path';
 
-    expect(parseImportSpecifier(spec)).toEqual({
+    expect(recognizeImport(spec)).toEqual({
       kind: 'package',
       spec,
       name: 'test-package',
@@ -47,14 +52,14 @@ describe('parseImportSpecifier', () => {
     });
   });
   it('does not recognize wrong package name', () => {
-    expect(parseImportSpecifier('@test')).toEqual({ kind: 'unknown', spec: '@test' });
-    expect(parseImportSpecifier('_test')).toEqual({ kind: 'unknown', spec: '_test' });
-    expect(parseImportSpecifier('.test')).toEqual({ kind: 'unknown', spec: '.test' });
+    expect(recognizeImport('@test')).toEqual({ kind: 'unknown', spec: '@test' });
+    expect(recognizeImport('_test')).toEqual({ kind: 'unknown', spec: '_test' });
+    expect(recognizeImport('.test')).toEqual({ kind: 'unknown', spec: '.test' });
   });
   it('recognizes URI', () => {
     const spec = 'file:///test-path?query';
 
-    expect(parseImportSpecifier(spec)).toEqual({
+    expect(recognizeImport(spec)).toEqual({
       kind: 'uri',
       spec,
       scheme: 'file',
@@ -64,7 +69,7 @@ describe('parseImportSpecifier', () => {
   it('recognizes absolute path', () => {
     const spec = '/test-path';
 
-    expect(parseImportSpecifier(spec)).toEqual({
+    expect(recognizeImport(spec)).toEqual({
       kind: 'path',
       spec,
       isRelative: false,
@@ -73,7 +78,7 @@ describe('parseImportSpecifier', () => {
   it('recognizes relative path', () => {
     const spec = './test-path';
 
-    expect(parseImportSpecifier(spec)).toEqual({
+    expect(recognizeImport(spec)).toEqual({
       kind: 'path',
       spec,
       isRelative: true,
@@ -82,7 +87,7 @@ describe('parseImportSpecifier', () => {
   it('recognizes virtual module', () => {
     const spec = '\0file:///test-path?query';
 
-    expect(parseImportSpecifier(spec)).toEqual({
+    expect(recognizeImport(spec)).toEqual({
       kind: 'virtual',
       spec,
     });
@@ -90,7 +95,7 @@ describe('parseImportSpecifier', () => {
   it('recognizes subpath', () => {
     const spec = '#/internal';
 
-    expect(parseImportSpecifier(spec)).toEqual({
+    expect(recognizeImport(spec)).toEqual({
       kind: 'subpath',
       spec,
     });

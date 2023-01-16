@@ -1,5 +1,5 @@
 import { ImportResolution } from '../api/import-resolution.js';
-import { parseImportSpecifier } from '../api/import-specifier.js';
+import { Import, recognizeImport } from '../api/import.js';
 import { ImportResolver } from './import-resolver.js';
 import { Import$Resolution } from './import.resolution.js';
 
@@ -12,15 +12,15 @@ export class URI$Resolution extends Import$Resolution {
     this.#resolver = resolver;
   }
 
-  override resolveImport(spec: string): ImportResolution {
-    const parsedSpec = parseImportSpecifier(spec);
+  override resolveImport(spec: Import | string): ImportResolution {
+    const recognizedSpec = recognizeImport(spec);
 
-    switch (parsedSpec.kind) {
+    switch (recognizedSpec.kind) {
       case 'uri':
       case 'path':
-        return this.#resolveURIImport(parsedSpec.spec);
+        return this.#resolveURIImport(recognizedSpec.spec);
       default:
-        return this.#resolver.resolve(parsedSpec);
+        return this.#resolver.resolve(recognizedSpec);
     }
   }
 

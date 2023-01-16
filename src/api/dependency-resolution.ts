@@ -1,7 +1,7 @@
 /**
- * Descriptor of how an imported module {@link ImportResolution#dependencyOn depends} on another one.
+ * Dependency resolution indicates how an imported module {@link ImportResolution#dependencyOn depends} on another one.
  */
-export interface ImportDependency {
+export interface DependencyResolution {
   /**
    * Dependency kind.
    *
