@@ -24,9 +24,9 @@ export class VirtualPackageFS extends PackageFS {
   /**
    * Constructs virtual package file system.
    *
-   * @param root - Root package URI. `package:///root` by default.
+   * @param root - Root package URI. `package:root` by default.
    */
-  constructor(root = 'package:///root') {
+  constructor(root = 'package:root') {
     super();
     this.#root = root;
   }
@@ -36,24 +36,56 @@ export class VirtualPackageFS extends PackageFS {
   }
 
   /**
+   * Registers virtual package with automatically generated URI.
+   *
+   * Replaces package under the same URI, unless `allowDuplicate` parameter set.
+   *
+   * Replaces package with the same name and version.
+   *
+   * @param uri - Package URI.
+   * @param packageJson - `package.json` contents.
+   * @param allowDuplicate - Permit package with the same name. `false` by default.
+   *
+   * @returns `this` instance.
+   */
+  addPackage(packageJson: PackageJson, allowDuplicate?: boolean): this;
+
+  /**
    * Registers virtual package.
    *
    * Replaces package under the same URI.
    *
-   * Replaces package with the same name and version.
+   * Replaces package with the same name and version, unless `allowDuplicate` parameter set.
    *
    * @param uri - Package URI.
    * @param packageJson - `package.json` contents.
    *
    * @returns `this` instance.
    */
-  addPackage(uri: string, packageJson: PackageJson): this {
-    uri = this.#toPackageURI(uri);
+  addPackage(uri: string, packageJson: PackageJson, allowDuplicate?: boolean): this;
 
-    const existing = this.#byURI.get(uri);
+  addPackage(
+    uriOrPackageJson: string | PackageJson,
+    packageJsonOrAllowDuplicate?: PackageJson | boolean,
+    allowDuplicate?: boolean,
+  ): this {
+    let uri: string;
+    let packageJson: PackageJson;
 
-    if (existing) {
-      this.#removeNamedPackage(existing.packageJson);
+    if (typeof uriOrPackageJson === 'string') {
+      uri = this.#toPackageURI(uriOrPackageJson);
+      packageJson = packageJsonOrAllowDuplicate as PackageJson;
+    } else {
+      packageJson = uriOrPackageJson;
+      uri = `package:${packageJson.name}/${packageJson.version}`;
+    }
+
+    if (!allowDuplicate) {
+      const existing = this.#byURI.get(uri);
+
+      if (existing) {
+        this.#removeNamedPackage(existing.packageJson);
+      }
     }
 
     this.#addPackage({ uri, packageJson });
@@ -118,6 +150,10 @@ export class VirtualPackageFS extends PackageFS {
     return parentPath !== uriPath ? this.#toPackageURI(pathToFileURL(parentPath).href) : undefined;
   }
 
+  override resolvePath(relativeTo: PackageResolution, path: string): string | URL {
+    return this.#toPackageURI(new URL(path, this.#toFileURL(relativeTo.uri)));
+  }
+
   override resolvePackage(relativeTo: PackageResolution, name: string): string;
 
   override resolvePackage({ uri }: PackageResolution, name: string): string {
@@ -167,16 +203,20 @@ export class VirtualPackageFS extends PackageFS {
     throw new ReferenceError(`No package "${name}@${range}" found`);
   }
 
-  #toPackageURI(uri: string): string {
-    const pathname = new URL(uri).pathname;
+  #toPackageURI(uri: string | URL): string {
+    const pathname = (typeof uri === 'string' ? new URL(uri) : uri).pathname;
 
-    return new URL(pathname.startsWith('/') ? pathname : `/${pathname}`, 'package:///').href;
+    return 'package:' + (pathname.startsWith('/') ? pathname.slice(1) : pathname);
   }
 
   #toFilePath(uri: string): string {
+    return fileURLToPath(this.#toFileURL(uri));
+  }
+
+  #toFileURL(uri: string): URL {
     const pathname = new URL(uri).pathname;
 
-    return fileURLToPath(new URL(pathname.startsWith('/') ? pathname : `/${pathname}`, 'file:///'));
+    return new URL(pathname.startsWith('/') ? pathname : `/${pathname}`, 'file:///');
   }
 
 }

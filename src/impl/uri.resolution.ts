@@ -2,7 +2,7 @@ import { ImportResolution } from '../api/import-resolution.js';
 import { Import, recognizeImport } from '../api/import.js';
 import { ImportResolver } from './import-resolver.js';
 import { Import$Resolution } from './import.resolution.js';
-import { urlToImport } from './url-to-import.js';
+import { uriToImport } from './uri-to-import.js';
 
 export class URI$Resolution extends Import$Resolution<Import.URI> {
 
@@ -26,7 +26,7 @@ export class URI$Resolution extends Import$Resolution<Import.URI> {
   }
 
   #resolveURIImport(spec: Import.URI | Import.Path): ImportResolution {
-    return this.#resolver.resolveURI(urlToImport(new URL(spec.spec, this.uri)));
+    return this.#resolver.resolveURI(uriToImport(new URL(spec.spec, this.uri)));
   }
 
 }

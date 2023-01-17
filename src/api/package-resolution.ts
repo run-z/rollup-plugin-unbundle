@@ -2,7 +2,7 @@ import { ImportResolver } from '../impl/import-resolver.js';
 import { Package$Resolution } from '../impl/package.resolution.js';
 import { ImportResolution } from './import-resolution.js';
 import { Import } from './import.js';
-import { NodePackageFS } from './node-package-js.js';
+import { NodePackageFS } from './node-package-fs.js';
 import { PackageFS } from './package-fs.js';
 import { PackageJson } from './package-json.js';
 

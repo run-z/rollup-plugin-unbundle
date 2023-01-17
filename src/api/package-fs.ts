@@ -45,6 +45,20 @@ export abstract class PackageFS {
   abstract parentDir(uri: string): string | undefined;
 
   /**
+   * Resolves path relatively to package.
+   *
+   * By default, uses URI resolution.
+   *
+   * @param relativeTo - Package to resolve the `path` against.
+   * @param path - Path to resolve.
+   *
+   * @returns URI of the resolved path.
+   */
+  resolvePath(relativeTo: PackageResolution, path: string): string | URL {
+    return new URL(path, relativeTo.uri);
+  }
+
+  /**
    * Resolves a package by name against another one.
    *
    * @param relativeTo - Package to resolve another one against.

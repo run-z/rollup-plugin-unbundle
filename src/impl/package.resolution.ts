@@ -6,7 +6,7 @@ import { PackageJson } from '../api/package-json.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { ImportResolver } from './import-resolver.js';
 import { Import$Resolution } from './import.resolution.js';
-import { urlToImport } from './url-to-import.js';
+import { uriToImport } from './uri-to-import.js';
 
 export class Package$Resolution
   extends Import$Resolution<Import.Package>
@@ -14,7 +14,7 @@ export class Package$Resolution
 
   readonly #resolver: ImportResolver;
   #packageJson: PackageJson | undefined;
-  readonly #dependencies = new Map<string, Map<string, false | PackageDep[]>>();
+  readonly #dependencies = new Map<string, Map<string, PackageDep | false>>();
 
   constructor(
     resolver: ImportResolver,
@@ -35,7 +35,7 @@ export class Package$Resolution
       this.#packageJson = this.#resolver.packageFS.loadPackageJson(this.uri);
 
       if (!this.#packageJson) {
-        throw new ReferenceError(`No "package.json" file found in "${this.uri}"`);
+        throw new ReferenceError(`No "package.json" file found at <${this.uri}>`);
       }
     }
 
@@ -65,7 +65,7 @@ export class Package$Resolution
       case 'uri':
         return this.#resolveURIImport(spec);
       case 'path':
-        return this.#resolveFileImport(spec.spec);
+        return this.#resolvePackageImport(spec.spec);
       case 'package':
         return this.#resolvePackage(spec.name);
       default:
@@ -77,17 +77,17 @@ export class Package$Resolution
     const packageURI = this.#resolver.packageFS.getPackageURI(spec);
 
     if (packageURI != null) {
-      return this.#resolveFileImport(spec.spec);
+      return this.#resolvePackageImport(spec.spec);
     }
 
     // Non-package URI.
     return this.#resolver.resolveURI(spec);
   }
 
-  #resolveFileImport(path: string): ImportResolution {
-    const url = new URL(path, this.uri);
+  #resolvePackageImport(path: string): ImportResolution {
+    const uriImport = uriToImport(this.#resolver.packageFS.resolvePath(this, path));
 
-    return this.#resolver.resolveURI(urlToImport(url), () => this.#discoverPackage(url.href));
+    return this.#resolver.resolveURI(uriImport, () => this.#discoverPackage(uriImport.spec));
   }
 
   #resolvePackage(name: string): ImportResolution {
@@ -104,13 +104,9 @@ export class Package$Resolution
     const { uri, packageJson } = packageDir;
 
     return this.#resolver.resolveURI(
-      urlToImport(new URL(uri)),
+      uriToImport(new URL(uri)),
       () => new Package$Resolution(this.#resolver, uri, undefined, packageJson),
     );
-  }
-
-  override asPackageResolution(): this {
-    return this;
   }
 
   override resolveDependency(another: ImportResolution): DependencyResolution | null {
@@ -130,15 +126,12 @@ export class Package$Resolution
     const depsByVersion = this.#dependencies.get(name);
 
     if (depsByVersion) {
-      const deps = depsByVersion.get(version);
+      const packageDep = depsByVersion.get(version);
 
-      if (deps) {
-        const match = deps.find(({ range }) => semver.satisfies(version, range));
-
-        if (match) {
-          return { kind: match.kind };
-        }
-      } else if (deps != null) {
+      if (packageDep && semver.satisfies(version, packageDep.range)) {
+        return { kind: packageDep.kind };
+      }
+      if (packageDep != null) {
         return null;
       }
     }
@@ -198,7 +191,7 @@ export class Package$Resolution
       if (dependency) {
         this.#saveDep(pkg, { kind, range, pkg });
 
-        return dependency;
+        return { kind };
       }
     }
 
@@ -213,21 +206,22 @@ export class Package$Resolution
       this.#dependencies.set(name, depsByVersion);
     }
 
-    let deps = depsByVersion.get(version);
-
-    if (!deps || !dep) {
-      deps = dep ? [dep] : dep;
-      depsByVersion.set(version, deps);
-    } else {
-      deps.push(dep);
-    }
+    depsByVersion.set(version, dep);
   }
 
   #resolveDep(depName: string): PackageResolution {
+    if (depName === this.name) {
+      return this; // Resolve to itself.
+    }
+
     return new Package$Resolution(
       this.#resolver,
       this.#resolver.packageFS.resolvePackage(this, depName),
     );
+  }
+
+  override asPackageResolution(): this {
+    return this;
   }
 
 }

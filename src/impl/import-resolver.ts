@@ -1,7 +1,7 @@
 import semver from 'semver';
 import { ImportResolution } from '../api/import-resolution.js';
 import { Import } from '../api/import.js';
-import { NodePackageFS } from '../api/node-package-js.js';
+import { NodePackageFS } from '../api/node-package-fs.js';
 import { PackageFS } from '../api/package-fs.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { Unknown$Resolution } from './unknown.resolution.js';
