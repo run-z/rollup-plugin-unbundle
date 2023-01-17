@@ -23,7 +23,7 @@ export interface UnbundleOptions {
    * The decision on bundling or externalizing each module will be made based on how the
    * {@link UnbundleRequest#resolutionRoot root module}
    * {@link rollup-plugin-unbundle/api!ImportResolution#resolveDependency depends} on
-   * {@link {@link UnbundleRequest#resolveModule target} one:
+   * {@link UnbundleRequest#resolveModule target} one:
    *
    * - Implied, runtime and peer dependencies will be externalized.
    * - For self-dependencies and synthetic ones no decision will be made.

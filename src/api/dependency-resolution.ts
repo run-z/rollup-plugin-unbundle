@@ -1,5 +1,6 @@
 /**
- * Dependency resolution indicates how an imported module {@link ImportResolution#dependencyOn depends} on another one.
+ * Dependency resolution indicates how an imported module {@link ImportResolution#resolveDependency depends}
+ * on another one.
  */
 export interface DependencyResolution {
   /**
@@ -8,7 +9,7 @@ export interface DependencyResolution {
    * One of:
    *
    * - `self` for module dependency on itself or some of its sub-modules.
-   * - `implied` for {@link implied dependency, such as Node.js built-in.
+   * - `implied` for implied dependency, such as Node.js built-in.
    * - `synthetic` for synthetic dependency.
    * - `runtime` for runtime (production) dependency.
    * - `dev` for development dependency.
