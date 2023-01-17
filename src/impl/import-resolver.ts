@@ -1,6 +1,8 @@
 import semver from 'semver';
 import { ImportResolution } from '../api/import-resolution.js';
 import { Import } from '../api/import.js';
+import { NodePackageFS } from '../api/node-package-js.js';
+import { PackageFS } from '../api/package-fs.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { Unknown$Resolution } from './unknown.resolution.js';
 import { URI$Resolution } from './uri.resolution.js';
@@ -8,15 +10,27 @@ import { URI$Resolution } from './uri.resolution.js';
 export class ImportResolver {
 
   readonly #root: ImportResolution;
+  readonly #packageFS: PackageFS;
   readonly #byURI = new Map<string, ImportResolution>();
   readonly #byName = new Map<string, PackageResolution[]>();
 
-  constructor(createRoot: (resolver: ImportResolver) => ImportResolution) {
+  constructor({
+    createRoot,
+    packageFS = new NodePackageFS(),
+  }: {
+    readonly createRoot: (resolver: ImportResolver) => ImportResolution;
+    readonly packageFS?: PackageFS;
+  }) {
+    this.#packageFS = packageFS;
     this.#root = createRoot(this);
   }
 
   get root(): ImportResolution {
     return this.#root;
+  }
+
+  get packageFS(): PackageFS {
+    return this.#packageFS;
   }
 
   resolve(spec: Import, createResolution?: () => ImportResolution | undefined): ImportResolution {

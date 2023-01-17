@@ -1,7 +1,3 @@
-import fs from 'node:fs';
-import { createRequire } from 'node:module';
-import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
 import semver from 'semver';
 import { DependencyResolution } from '../api/dependency-resolution.js';
 import { ImportResolution } from '../api/import-resolution.js';
@@ -17,34 +13,33 @@ export class Package$Resolution
   implements PackageResolution {
 
   readonly #resolver: ImportResolver;
-  readonly #dir: string;
   #packageJson: PackageJson | undefined;
   readonly #dependencies = new Map<string, Map<string, false | PackageDep[]>>();
-  #requireModule?: NodeRequire;
 
   constructor(
     resolver: ImportResolver,
-    uri: `file:///${string}`,
+    uri: string,
     importSpec?: Import.Package,
     packageJson?: PackageJson,
   ) {
     super(resolver, uri, importSpec ?? (() => packageImportSpec(this)));
     this.#resolver = resolver;
-    this.#dir = fileURLToPath(uri);
     this.#packageJson = packageJson;
-  }
-
-  get dir(): string {
-    return this.#dir;
   }
 
   /**
    * `package.json` contents.
    */
   get packageJson(): PackageJson {
-    return (this.#packageJson ??= JSON.parse(
-      fs.readFileSync(path.resolve(this.dir, 'package.json'), 'utf-8'),
-    ) as PackageJson);
+    if (!this.#packageJson) {
+      this.#packageJson = this.#resolver.packageFS.loadPackageJson(this.uri);
+
+      if (!this.#packageJson) {
+        throw new ReferenceError(`No "package.json" file found in "${this.uri}"`);
+      }
+    }
+
+    return this.#packageJson;
   }
 
   get name(): string {
@@ -68,12 +63,7 @@ export class Package$Resolution
 
     switch (spec.kind) {
       case 'uri':
-        if (spec.scheme === 'file') {
-          return this.#resolveFileImport(spec.spec);
-        }
-
-        // Unknown import URI.
-        return this.#resolver.resolveURI(spec);
+        return this.#resolveURIImport(spec);
       case 'path':
         return this.#resolveFileImport(spec.spec);
       case 'package':
@@ -81,6 +71,17 @@ export class Package$Resolution
       default:
         return this.#resolver.resolve(spec);
     }
+  }
+
+  #resolveURIImport(spec: Import.URI): ImportResolution {
+    const packageURI = this.#resolver.packageFS.getPackageURI(spec);
+
+    if (packageURI != null) {
+      return this.#resolveFileImport(spec.spec);
+    }
+
+    // Non-package URI.
+    return this.#resolver.resolveURI(spec);
   }
 
   #resolveFileImport(path: string): ImportResolution {
@@ -93,66 +94,19 @@ export class Package$Resolution
     return this.#resolver.resolveName(name, '*', () => this.#resolveDep(name));
   }
 
-  #discoverPackage(uri: string): ImportResolution | undefined {
-    return this.#findPackageInDir(path.dirname(fileURLToPath(uri)));
-  }
+  #discoverPackage(dirURI: string): ImportResolution | undefined {
+    const packageDir = this.#resolver.packageFS.findPackageDir(dirURI);
 
-  #findPackageInDir(dir: string): ImportResolution | undefined {
-    const packageJson = this.#hasNodeModules(dir) && this.#loadPackageJson(dir);
-
-    if (packageJson) {
-      const dirURL = pathToFileURL(dir);
-
-      return this.#resolver.resolveURI(
-        urlToImport(dirURL),
-        () => new Package$Resolution(
-            this.#resolver,
-            dirURL.href as `file:///${string}`,
-            undefined,
-            packageJson,
-          ),
-      );
-    }
-
-    // No valid `package.json` found in directory.
-    // Try the parent directory.
-    const parentDir = path.dirname(dir);
-
-    if (parentDir === dir) {
-      // No parent directory.
+    if (!packageDir) {
       return;
     }
 
-    return this.#findPackageInDir(dir);
-  }
+    const { uri, packageJson } = packageDir;
 
-  #hasNodeModules(dir: string): boolean {
-    try {
-      return fs.statSync(path.resolve(dir, 'node_modules')).isDirectory();
-    } catch (error) {
-      return false;
-    }
-  }
-
-  #loadPackageJson(dir: string): PackageJson | undefined {
-    const filePath = path.resolve(dir, 'package.json');
-
-    try {
-      if (!fs.statSync(filePath).isFile()) {
-        return;
-      }
-    } catch (error) {
-      return;
-    }
-
-    const packageJson = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Partial<PackageJson>;
-
-    if (packageJson.name && packageJson.version) {
-      // Valid `package.json`?
-      return packageJson as PackageJson;
-    }
-
-    return;
+    return this.#resolver.resolveURI(
+      urlToImport(new URL(uri)),
+      () => new Package$Resolution(this.#resolver, uri, undefined, packageJson),
+    );
   }
 
   override asPackageResolution(): this {
@@ -270,11 +224,10 @@ export class Package$Resolution
   }
 
   #resolveDep(depName: string): PackageResolution {
-    this.#requireModule ??= createRequire(this.uri);
-
-    const url = pathToFileURL(this.#requireModule.resolve(depName)).href;
-
-    return new Package$Resolution(this.#resolver, url as `file:///${string}`);
+    return new Package$Resolution(
+      this.#resolver,
+      this.#resolver.packageFS.resolvePackage(this, depName),
+    );
   }
 
 }
@@ -297,7 +250,6 @@ function packageImportSpec({ packageJson: { name } }: PackageResolution): Import
 }
 
 export interface Package$Resolution extends PackageResolution {
-  get uri(): `file:///${string}`;
   asImpliedResolution(): undefined;
 }
 

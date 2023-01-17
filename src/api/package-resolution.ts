@@ -1,9 +1,9 @@
-import process from 'node:process';
-import { pathToFileURL } from 'node:url';
 import { ImportResolver } from '../impl/import-resolver.js';
 import { Package$Resolution } from '../impl/package.resolution.js';
 import { ImportResolution } from './import-resolution.js';
 import { Import } from './import.js';
+import { NodePackageFS } from './node-package-js.js';
+import { PackageFS } from './package-fs.js';
 import { PackageJson } from './package-json.js';
 
 /**
@@ -13,16 +13,11 @@ import { PackageJson } from './package-json.js';
  */
 export interface PackageResolution extends ImportResolution {
   /**
-   * File URL of {@link dir root package directory}.
+   * URI of package.
    */
-  get uri(): `file:///${string}`;
+  get uri(): string;
 
   get importSpec(): Import.Package;
-
-  /**
-   * Absolute path to root package directory.
-   */
-  get dir(): string;
 
   /**
    * `package.json` contents.
@@ -59,12 +54,17 @@ export interface PackageResolution extends ImportResolution {
  *
  * Creates new resolution root. Further resolutions should be made against it.
  *
- * @param dir - Path to package directory. Defaults to current working directory.
+ * @param dirOrFS - Either path to package directory, or {@link PackageFS package file system} instance. Defaults
+ * to current working directory.
  *
  * @returns Package resolution.
  */
-export function resolveRootPackage(dir = process.cwd()): PackageResolution {
-  return new ImportResolver(
-    resolver => new Package$Resolution(resolver, pathToFileURL(dir).href as `file:///${string}`),
-  ).root.asPackageResolution()!;
+export function resolveRootPackage(dirOrFS?: string | PackageFS): PackageResolution {
+  const packageFS =
+    dirOrFS == null || typeof dirOrFS === 'string' ? new NodePackageFS(dirOrFS) : dirOrFS;
+
+  return new ImportResolver({
+    createRoot: resolver => new Package$Resolution(resolver, packageFS.root),
+    packageFS,
+  }).root.asPackageResolution()!;
 }
