@@ -31,8 +31,10 @@ export function IsRollupExternalImport(
 
   if (byIds) {
     if (byPatterns) {
-      return function isExternalModuleId(source, importer, isResolved) {
-        return byIds(source, importer, isResolved) ?? byPatterns(source, importer, isResolved);
+      return function isExternalModuleId(moduleId, importerId, isResolved) {
+        return (
+          byIds(moduleId, importerId, isResolved) ?? byPatterns(moduleId, importerId, isResolved)
+        );
       };
     }
 
@@ -46,37 +48,41 @@ export function IsRollupExternalImport(
   return notExternal;
 }
 
-function notExternal(_source: string, _importer: string | undefined, _isResolved: boolean): void {
+function notExternal(
+  _moduleId: string,
+  _importerId: string | undefined,
+  _isResolved: boolean,
+): void {
   // No externals specified explicitly.
 }
 
 function externalByIds(
   external: string | RegExp | readonly (string | RegExp)[],
 ): IsRollupExternalImport | undefined {
-  const ids: string[] =
+  const externalIdList: string[] =
     typeof external === 'string'
       ? [external]
       : Array.isArray(external)
       ? external.filter(item => typeof item === 'string')
       : [];
 
-  if (ids.length < 2) {
-    if (!ids.length) {
+  if (externalIdList.length < 2) {
+    if (!externalIdList.length) {
       return;
     }
-    if (ids.length === 1) {
-      const [id] = ids;
+    if (externalIdList.length === 1) {
+      const [externalId] = externalIdList;
 
-      return function hasExternalId(source, _importer, _isResolved) {
-        return source === id || undefined;
+      return function hasExternalId(moduleId, _importerId, _isResolved) {
+        return moduleId === externalId || undefined;
       };
     }
   }
 
-  const setOfIds = new Set(ids);
+  const externalIdSet = new Set(externalIdList);
 
-  return function hasOneOfExternalIds(source, _importer, _isResolved) {
-    return setOfIds.has(source) || undefined;
+  return function hasOneOfExternalIds(moduleId, _importerId, _isResolved) {
+    return externalIdSet.has(moduleId) || undefined;
   };
 }
 
@@ -96,13 +102,13 @@ function externalByPatterns(
     if (patterns.length === 1) {
       const [pattern] = patterns;
 
-      return function matchesExternalIdPattern(source, _importer, _isResolved) {
-        return pattern.test(source) || undefined;
+      return function matchesExternalIdPattern(moduleId, _importerId, _isResolved) {
+        return pattern.test(moduleId) || undefined;
       };
     }
   }
 
-  return function matchesOneOfExternalIdPatterns(source, _importer, _isResolved) {
-    return patterns.some(pattern => pattern.test(source)) || undefined;
+  return function matchesOneOfExternalIdPatterns(moduleId, _importerId, _isResolved) {
+    return patterns.some(pattern => pattern.test(moduleId)) || undefined;
   };
 }

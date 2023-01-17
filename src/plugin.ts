@@ -2,6 +2,7 @@
  * @module rollup-plugin-unbundle
  */
 export * from './unbundle-options.js';
+export * from './unbundle-request.js';
 import { InputOptions, MinimalPluginContext, Plugin } from 'rollup';
 import { IsRollupExternalImport } from './api/is-rollup-external-import.js';
 import { updateExternal } from './impl/update-external.js';

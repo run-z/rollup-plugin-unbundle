@@ -1,49 +1,38 @@
+import { NullValue } from 'rollup';
 import { IsRollupExternalImport } from '../api/is-rollup-external-import.js';
 import { resolveRootPackage } from '../api/package-resolution.js';
 import { UnbundleOptions } from '../unbundle-options.js';
+import { Unbundle$Request } from './unbundle.request.js';
 
 export function updateExternal(
   isExternal: IsRollupExternalImport,
-  { resolutionRoot = resolveRootPackage() }: UnbundleOptions = {},
+  options: UnbundleOptions = {},
 ): IsRollupExternalImport {
-  return function isExternalOrBundled(source, importer, isResolved): boolean | undefined {
-    const initiallyExternal = isExternal(source, importer, isResolved);
+  const { resolutionRoot: root } = options;
+  const resolutionRoot = root == null || typeof root === 'string' ? resolveRootPackage(root) : root;
+
+  return function isExternalOrBundled(moduleId, importerId, isResolved): boolean | NullValue {
+    const initiallyExternal = isExternal(moduleId, importerId, isResolved);
 
     if (initiallyExternal != null) {
       return initiallyExternal;
     }
 
-    const base = importer ? resolutionRoot.resolveImport(importer) : resolutionRoot;
-    const resolution = base.resolveImport(source);
-    const packageResolution = resolution.asPackageResolution();
+    const request = new Unbundle$Request({ resolutionRoot, moduleId, isResolved, importerId });
 
-    if (packageResolution && source !== packageResolution.name) {
-      // Try second time with package name.
-      const externalPackage = isExternal(packageResolution.name, importer, false);
+    if (!isResolved) {
+      const packageResolution = request.resolveModule().asPackageResolution();
 
-      if (externalPackage != null) {
-        return externalPackage;
+      if (packageResolution && moduleId !== packageResolution.name) {
+        // Try second time with package name.
+        const externalPackage = isExternal(packageResolution.name, importerId, false);
+
+        if (externalPackage != null) {
+          return externalPackage;
+        }
       }
     }
 
-    const dependency = resolutionRoot.resolveDependency(resolution);
-
-    if (!dependency) {
-      // Something imported, but no dependency declared.
-      // Externalize it.
-      return true;
-    }
-
-    const { kind } = dependency;
-
-    if (kind === 'self' || kind === 'synthetic') {
-      // No decision on self-dependencies and synthetic ones.
-      // Rollup will decide which chunk to place them to.
-      return;
-    }
-
-    // Externalize implied, runtime and peer dependencies.
-    // Bundle development everything else (e.g. development dependencies).
-    return kind === 'implied' || kind === 'runtime' || kind === 'peer';
+    return options.external ? options.external(request) : request.detectExternal();
   };
 }
