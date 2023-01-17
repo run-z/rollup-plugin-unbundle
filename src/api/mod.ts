@@ -9,3 +9,4 @@ export * from './node-package-js.js';
 export * from './package-fs.js';
 export * from './package-json.js';
 export * from './package-resolution.js';
+export * from './virtual-package-fs.js';
