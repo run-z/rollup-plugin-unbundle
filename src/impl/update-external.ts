@@ -36,13 +36,14 @@ export function updateExternal(
 
     const { kind } = dependency;
 
-    if (kind === 'synthetic') {
-      // No decision on synthetic dependencies.
+    if (kind === 'self' || kind === 'synthetic') {
+      // No decision on self-dependencies and synthetic ones.
+      // Rollup will decide which chunk to place them to.
       return;
     }
 
     // Externalize implied, runtime and peer dependencies.
-    // Bundle development and sub-module dependencies.
+    // Bundle development everything else (e.g. development dependencies).
     return kind === 'implied' || kind === 'runtime' || kind === 'peer';
   };
 }

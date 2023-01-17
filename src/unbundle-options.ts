@@ -11,7 +11,8 @@ export interface UnbundleOptions {
    * {@link rollup-plugin-unbundle/api!ImportResolution#resolveDependency depends} on target one:
    *
    * - Implied, runtime and peer dependencies will be externalized.
-   * - For synthetic one no decision will be made. I.e. they will be bundled, unless overridden by `external` option.
+   * - For self-dependencies and synthetic ones no decision will be made.
+   *   Rollup will decide then how to bundle them. I.e. which chunk to place them into.
    * - The rest of the dependencies (such as development, and self-dependencies) will be bundled.
    *
    * By default, new resolution root will be created for {@link  rollup-plugin-unbundle/api!resolveRootPackage
