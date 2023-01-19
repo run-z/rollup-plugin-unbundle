@@ -41,3 +41,12 @@ jobs:
 
       - name: Build the project
         run: pnpm ci:all
+
+      - name: Upload coverage report
+        env:
+          CODACY_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        if: ${{ env.CODACY_TOKEN }}
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ env.CODACY_TOKEN }}
+          coverage-reports: target/coverage/lcov.info
