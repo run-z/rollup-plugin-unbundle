@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { Import, recognizeImport } from './import.js';
 import { NodePackageFS } from './node-package-fs.js';
@@ -26,10 +27,12 @@ describe('NodePackageFS', () => {
 
   describe('loadPackageJson', () => {
     it('ignores non-file package.json', () => {
-      expect(fs.loadPackageJson(pathToFileURL('testing').href)).toBeUndefined();
+      expect(fs.loadPackageJson(pathToFileURL(path.resolve('testing')).href)).toBeUndefined();
     });
     it('ignores incomplete package.json', () => {
-      expect(fs.loadPackageJson(pathToFileURL('testing/wrong-package').href)).toBeUndefined();
+      expect(
+        fs.loadPackageJson(pathToFileURL(path.resolve('testing/wrong-package')).href),
+      ).toBeUndefined();
     });
   });
 });
