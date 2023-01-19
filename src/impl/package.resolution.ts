@@ -216,7 +216,7 @@ export class Package$Resolution
 
     return new Package$Resolution(
       this.#resolver,
-      this.#resolver.packageFS.resolvePackage(this, depName),
+      this.#resolver.packageFS.resolveName(this, depName),
     );
   }
 

@@ -66,7 +66,7 @@ export abstract class PackageFS {
    *
    * @returns URI of the resolved package directory.
    */
-  abstract resolvePackage(relativeTo: PackageResolution, name: string): string;
+  abstract resolveName(relativeTo: PackageResolution, name: string): string;
 
   /**
    * Searches for package directory containing the given file or URI.

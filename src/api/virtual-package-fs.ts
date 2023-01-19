@@ -38,9 +38,9 @@ export class VirtualPackageFS extends PackageFS {
   /**
    * Registers virtual package with automatically generated URI.
    *
-   * Replaces package under the same URI, unless `allowDuplicate` parameter set.
+   * Replaces package under the same URI.
    *
-   * Replaces package with the same name and version.
+   * Replaces package with the same name and version, unless `allowDuplicate` parameter is set.
    *
    * @param uri - Package URI.
    * @param packageJson - `package.json` contents.
@@ -51,11 +51,11 @@ export class VirtualPackageFS extends PackageFS {
   addPackage(packageJson: PackageJson, allowDuplicate?: boolean): this;
 
   /**
-   * Registers virtual package.
+   * Registers virtual package at the given URI.
    *
    * Replaces package under the same URI.
    *
-   * Replaces package with the same name and version, unless `allowDuplicate` parameter set.
+   * Replaces package with the same name and version, unless `allowDuplicate` parameter is set.
    *
    * @param uri - Package URI.
    * @param packageJson - `package.json` contents.
@@ -115,17 +115,8 @@ export class VirtualPackageFS extends PackageFS {
   }
 
   #removeNamedPackage({ name, version }: PackageJson): void {
-    const byVersion = this.#byName.get(name);
-
-    if (!byVersion) {
-      return;
-    }
-
-    const existing = byVersion.get(version);
-
-    if (!existing) {
-      return;
-    }
+    const byVersion = this.#byName.get(name)!; // Won't be called for non-existing package.
+    const existing = byVersion.get(version)!; // Won't be called for non-existing package version.
 
     byVersion.delete(version);
     if (!byVersion.size) {
@@ -154,16 +145,10 @@ export class VirtualPackageFS extends PackageFS {
     return this.#toPackageURI(new URL(path, this.#toFileURL(relativeTo.uri)));
   }
 
-  override resolvePackage(relativeTo: PackageResolution, name: string): string;
+  override resolveName(relativeTo: PackageResolution, name: string): string;
 
-  override resolvePackage({ uri }: PackageResolution, name: string): string {
-    const packageDir = this.#byURI.get(uri);
-
-    if (!packageDir) {
-      throw new ReferenceError(`No package found at <${uri}>`);
-    }
-
-    const { packageJson } = packageDir;
+  override resolveName(relativeTo: PackageResolution, name: string): string {
+    const { packageJson } = relativeTo;
     const { dependencies, devDependencies, peerDependencies } = packageJson;
     const found =
       this.#resolveDep(name, dependencies)
@@ -175,7 +160,7 @@ export class VirtualPackageFS extends PackageFS {
     }
 
     throw new ReferenceError(
-      `Can not resolve dependency "${name}" of "${packageJson.name}@${packageJson.version}" at <${packageDir.uri}>`,
+      `Can not resolve dependency "${name}" of "${packageJson.name}@${packageJson.version}" at <${relativeTo.uri}>`,
     );
   }
 

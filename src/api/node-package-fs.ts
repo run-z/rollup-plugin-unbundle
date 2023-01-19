@@ -40,9 +40,9 @@ export class NodePackageFS extends PackageFS {
     return importSpec.scheme === 'file' ? importSpec.spec : undefined;
   }
 
-  override resolvePackage(relativeTo: PackageResolution, name: string): string;
+  override resolveName(relativeTo: PackageResolution, name: string): string;
 
-  override resolvePackage({ uri }: PackageResolution, name: string): string {
+  override resolveName({ uri }: PackageResolution, name: string): string {
     const requireModule = createRequire(uri);
 
     return pathToFileURL(requireModule.resolve(name)).href;
