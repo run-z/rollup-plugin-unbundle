@@ -1,7 +1,6 @@
 import semver from 'semver';
 import { ImportResolution } from '../api/import-resolution.js';
 import { Import } from '../api/import.js';
-import { NodePackageFS } from '../api/node-package-fs.js';
 import { PackageFS } from '../api/package-fs.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { Unknown$Resolution } from './unknown.resolution.js';
@@ -16,10 +15,10 @@ export class ImportResolver {
 
   constructor({
     createRoot,
-    packageFS = new NodePackageFS(),
+    packageFS,
   }: {
     readonly createRoot: (resolver: ImportResolver) => ImportResolution;
-    readonly packageFS?: PackageFS;
+    readonly packageFS: PackageFS;
   }) {
     this.#packageFS = packageFS;
     this.#root = createRoot(this);
@@ -76,7 +75,11 @@ export class ImportResolver {
     );
   }
 
-  resolveName(name: string, range: string): PackageResolution | undefined;
+  resolveName(
+    name: string,
+    range: string,
+    createPackage?: () => PackageResolution | undefined,
+  ): PackageResolution | undefined;
 
   resolveName(
     name: string,
@@ -87,7 +90,7 @@ export class ImportResolver {
   resolveName(
     name: string,
     range: string,
-    resolvePackage?: () => PackageResolution,
+    createPackage?: () => PackageResolution | undefined,
   ): PackageResolution | undefined {
     const candidates = this.#byName.get(name);
 
@@ -99,7 +102,9 @@ export class ImportResolver {
       }
     }
 
-    return resolvePackage && this.#addResolution(resolvePackage());
+    const newPackage = createPackage?.();
+
+    return newPackage && this.#addResolution(newPackage);
   }
 
   #addResolution<T extends ImportResolution>(resolution: T, uri = resolution.uri): T {

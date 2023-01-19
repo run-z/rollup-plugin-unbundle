@@ -1,6 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { InputOptions } from 'rollup';
-import { IsRollupExternalImport } from './api/is-rollup-external-import.js';
+import { MinimalPluginContext } from 'rollup';
 import unbundle from './plugin.js';
 
 describe('unbundle', () => {
@@ -11,8 +10,8 @@ describe('unbundle', () => {
   });
   it('enhances "external" option', () => {
     const plugin = unbundle();
-    const options = (plugin.options as (options: InputOptions) => InputOptions)({});
+    const options = plugin.options.call({} as MinimalPluginContext, {});
 
-    expect((options.external as IsRollupExternalImport).name).toBe('isExternalOrBundled');
+    expect(options.external.name).toBe('isExternalOrBundled');
   });
 });

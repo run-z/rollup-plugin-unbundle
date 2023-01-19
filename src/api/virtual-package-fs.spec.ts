@@ -35,19 +35,15 @@ describe('VirtualPackageFS', () => {
       fs.addPackage('package:test', { name: 'test2', version: '1.0.0' });
 
       expect(fs.resolveName(root, 'test2')).toBe('package:test');
-      expect(() => fs.resolveName(root, 'test')).toThrow(
-        new ReferenceError('No package "test@1.0.0" found'),
-      );
+      expect(fs.resolveName(root, 'test')).toBeUndefined();
     });
   });
 
   describe('resolveName', () => {
-    it('throws if package has no specified dependency', () => {
+    it('does not resolve missing dependency', () => {
       fs.addPackage(root.uri, { name: 'root', version: '1.0.0', dependencies: { test: '1.0.0' } });
 
-      expect(() => fs.resolveName(root, 'test2')).toThrow(
-        new ReferenceError(`Can not resolve dependency "test2" of "root@1.0.0" at <package:root>`),
-      );
+      expect(fs.resolveName(root, 'test2')).toBeUndefined();
     });
   });
 

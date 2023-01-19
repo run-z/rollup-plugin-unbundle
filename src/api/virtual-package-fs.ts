@@ -145,22 +145,14 @@ export class VirtualPackageFS extends PackageFS {
     return this.#toPackageURI(new URL(path, this.#toFileURL(relativeTo.uri)));
   }
 
-  override resolveName(relativeTo: PackageResolution, name: string): string;
-
-  override resolveName(relativeTo: PackageResolution, name: string): string {
+  override resolveName(relativeTo: PackageResolution, name: string): string | undefined {
     const { packageJson } = relativeTo;
-    const { dependencies, devDependencies, peerDependencies } = packageJson;
-    const found =
+    const { dependencies, peerDependencies, devDependencies } = packageJson;
+
+    return (
       this.#resolveDep(name, dependencies)
+      ?? this.#resolveDep(name, peerDependencies)
       ?? this.#resolveDep(name, devDependencies)
-      ?? this.#resolveDep(name, peerDependencies);
-
-    if (found) {
-      return found;
-    }
-
-    throw new ReferenceError(
-      `Can not resolve dependency "${name}" of "${packageJson.name}@${packageJson.version}" at <${relativeTo.uri}>`,
     );
   }
 
@@ -185,7 +177,7 @@ export class VirtualPackageFS extends PackageFS {
       }
     }
 
-    throw new ReferenceError(`No package "${name}@${range}" found`);
+    return;
   }
 
   #toPackageURI(uri: string | URL): string {

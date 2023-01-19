@@ -64,9 +64,9 @@ export abstract class PackageFS {
    * @param relativeTo - Package to resolve another one against.
    * @param name - Package name to resolve.
    *
-   * @returns URI of the resolved package directory.
+   * @returns URI of the resolved package directory, or `undefined` if the name can not be resolved.
    */
-  abstract resolveName(relativeTo: PackageResolution, name: string): string;
+  abstract resolveName(relativeTo: PackageResolution, name: string): string | undefined;
 
   /**
    * Searches for package directory containing the given file or URI.

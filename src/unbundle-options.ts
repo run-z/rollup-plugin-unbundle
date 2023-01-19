@@ -34,5 +34,5 @@ export interface UnbundleOptions {
    *
    * @returns `true` to externalize module, `false` to bundle it, or `null`/`undefined` to make Rollup to decide.
    */
-  external?(request: UnbundleRequest): boolean | NullValue;
+  isExternal?(request: UnbundleRequest): boolean | NullValue;
 }

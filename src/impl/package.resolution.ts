@@ -15,6 +15,7 @@ export class Package$Resolution
   readonly #resolver: ImportResolver;
   #packageJson: PackageJson | undefined;
   readonly #dependencies = new Map<string, Map<string, PackageDep | false>>();
+  #peerDependencies?: PackageJson.Dependencies;
 
   constructor(
     resolver: ImportResolver,
@@ -63,39 +64,68 @@ export class Package$Resolution
 
     switch (spec.kind) {
       case 'uri':
-        return this.#resolveURIImport(spec);
+        return this.#resolveURI(spec);
       case 'path':
-        return this.#resolvePackageImport(spec.spec);
+        return this.#resolvePath(spec.spec);
       case 'package':
-        return this.#resolvePackage(spec.name);
+        return this.#resolveName(spec.name) ?? this.#resolver.resolve(spec);
       default:
         return this.#resolver.resolve(spec);
     }
   }
 
-  #resolveURIImport(spec: Import.URI): ImportResolution {
+  #getPeerDependencies(): PackageJson.Dependencies {
+    if (this.#peerDependencies) {
+      return this.#peerDependencies;
+    }
+
+    const { devDependencies, peerDependencies } = this.packageJson;
+
+    if (!peerDependencies || !devDependencies) {
+      // No installed peer dependencies.
+      return (this.#peerDependencies = {});
+    }
+
+    // Detect uninstalled peer dependencies.
+    const uninstalledDeps: Record<string, string> = { ...peerDependencies };
+
+    for (const devDep of Object.keys(devDependencies)) {
+      delete uninstalledDeps[devDep];
+    }
+
+    // Select only installed peer dependencies, as the rest of them can not be resolved.
+    const installedDeps: Record<string, string> = { ...peerDependencies };
+
+    for (const uninstalledDep of Object.keys(uninstalledDeps)) {
+      delete installedDeps[uninstalledDep];
+    }
+
+    return (this.#peerDependencies = installedDeps);
+  }
+
+  #resolveURI(spec: Import.URI): ImportResolution {
     const packageURI = this.#resolver.packageFS.getPackageURI(spec);
 
     if (packageURI != null) {
-      return this.#resolvePackageImport(spec.spec);
+      return this.#resolvePath(spec.spec);
     }
 
     // Non-package URI.
     return this.#resolver.resolveURI(spec);
   }
 
-  #resolvePackageImport(path: string): ImportResolution {
+  #resolvePath(path: string): ImportResolution {
     const uriImport = uriToImport(this.#resolver.packageFS.resolvePath(this, path));
 
     return this.#resolver.resolveURI(uriImport, () => this.#discoverPackage(uriImport.spec));
   }
 
-  #resolvePackage(name: string): ImportResolution {
+  #resolveName(name: string): ImportResolution | undefined {
     return this.#resolver.resolveName(name, '*', () => this.#resolveDep(name));
   }
 
-  #discoverPackage(dirURI: string): ImportResolution | undefined {
-    const packageDir = this.#resolver.packageFS.findPackageDir(dirURI);
+  #discoverPackage(resolvedURI: string): ImportResolution | undefined {
+    const packageDir = this.#resolver.packageFS.findPackageDir(resolvedURI);
 
     if (!packageDir) {
       return;
@@ -136,14 +166,14 @@ export class Package$Resolution
       }
     }
 
-    const { dependencies, devDependencies, peerDependencies } = this.packageJson;
+    const { dependencies, devDependencies } = this.packageJson;
 
     const dependency =
       this.#establishDirectDep(pkg, dependencies, 'runtime')
-      || this.#establishDirectDep(pkg, peerDependencies, 'peer')
+      || this.#establishDirectDep(pkg, this.#getPeerDependencies(), 'peer')
       || this.#establishDirectDep(pkg, devDependencies, 'dev')
       || this.#establishTransientDep(pkg, dependencies, 'runtime')
-      || this.#establishTransientDep(pkg, peerDependencies, 'peer')
+      || this.#establishTransientDep(pkg, this.#getPeerDependencies(), 'peer')
       || this.#establishTransientDep(pkg, devDependencies, 'dev');
 
     if (!dependency) {
@@ -186,7 +216,7 @@ export class Package$Resolution
     for (const [depName, range] of Object.entries(dependencies)) {
       const dependency = this.#resolver
         .resolveName(depName, range, () => this.#resolveDep(depName))
-        .resolveDependency(pkg);
+        ?.resolveDependency(pkg);
 
       if (dependency) {
         this.#saveDep(pkg, { kind, range, pkg });
@@ -209,15 +239,14 @@ export class Package$Resolution
     depsByVersion.set(version, dep);
   }
 
-  #resolveDep(depName: string): PackageResolution {
+  #resolveDep(depName: string): PackageResolution | undefined {
     if (depName === this.name) {
       return this; // Resolve to itself.
     }
 
-    return new Package$Resolution(
-      this.#resolver,
-      this.#resolver.packageFS.resolveName(this, depName),
-    );
+    const packageURI = this.#resolver.packageFS.resolveName(this, depName);
+
+    return packageURI ? new Package$Resolution(this.#resolver, packageURI) : undefined;
   }
 
   override asPackageResolution(): this {

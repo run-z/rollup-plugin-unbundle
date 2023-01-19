@@ -60,7 +60,7 @@ export class Unbundle$Request implements UnbundleRequest {
     const dependency = this.resolutionRoot.resolveDependency(this.resolveModule());
 
     if (!dependency) {
-      // Something imported, but no dependency declared.
+      // Something is imported, but no dependency declared.
       // Externalize it.
       return true;
     }

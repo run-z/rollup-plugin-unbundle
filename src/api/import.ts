@@ -266,7 +266,7 @@ function isRelativeImport(spec: string): spec is '.' | '..' | `./${string}` | `.
 
 const URI_PATTERN = /^(?:([^:/?#]+):)(?:\/\/(?:[^/?#]*))?([^?#]*)(?:\?(?:[^#]*))?(?:#(?:.*))?/;
 
-export function recognizeImportURI(spec: string): Import.URI | undefined {
+function recognizeImportURI(spec: string): Import.URI | undefined {
   const match = URI_PATTERN.exec(spec);
 
   if (!match) {

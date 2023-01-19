@@ -121,6 +121,17 @@ describe('PackageResolution', () => {
       expect(found.importSpec.kind).toBe('package');
       expect(found.asPackageResolution()).toBe(found);
     });
+    it('resolves uninstalled peer dependency as unknown import', () => {
+      fs.addPackage(fs.root, {
+        name: 'root',
+        version: '1.0.0',
+        peerDependencies: { dep: '1.0.0' },
+        devDependencies: { dep2: '1.0.0' },
+      });
+      root = resolveRootPackage(fs);
+
+      expect(root.resolveImport('dep').uri).toBe('import:package:dep');
+    });
   });
 
   describe('resolveDependency', () => {
@@ -163,6 +174,7 @@ describe('PackageResolution', () => {
         name: 'root',
         version: '1.0.0',
         peerDependencies: { dep: '1.0.0' },
+        devDependencies: { dep: '1.0.0' },
       });
       fs.addPackage({ name: 'dep', version: '1.0.0' });
 
@@ -193,7 +205,7 @@ describe('PackageResolution', () => {
         version: '1.0.0',
         devDependencies: { dep1: '1.0.0' },
       });
-      fs.addPackage({ name: 'dep1', version: '1.0.0', peerDependencies: { dep2: '^1.0.0' } });
+      fs.addPackage({ name: 'dep1', version: '1.0.0', dependencies: { dep2: '^1.0.0' } });
       fs.addPackage({ name: 'dep2', version: '1.0.0' });
 
       root = resolveRootPackage(fs);
@@ -209,6 +221,7 @@ describe('PackageResolution', () => {
         name: 'root',
         version: '1.0.0',
         peerDependencies: { dep1: '1.0.0' },
+        devDependencies: { dep1: '1.0.0' },
       });
       fs.addPackage({ name: 'dep1', version: '1.0.0', dependencies: { dep2: '^1.0.0' } });
       fs.addPackage({ name: 'dep2', version: '1.0.0' });
@@ -248,6 +261,7 @@ describe('PackageResolution', () => {
         name: 'root',
         version: '1.0.0',
         peerDependencies: { dep1: '^1.0.0' },
+        devDependencies: { dep1: '^1.0.0' },
       });
       fs.addPackage({ name: 'dep1', version: '1.0.0', dependencies: { dep2: '^1.0.0' } });
       fs.addPackage({ name: 'dep2', version: '1.0.0' });
@@ -263,11 +277,11 @@ describe('PackageResolution', () => {
         kind: 'peer',
       });
     });
-    it('does not resolves among multiple dependency versions', () => {
+    it('does not resolve among multiple dependency versions', () => {
       fs.addPackage(fs.root, {
         name: 'root',
         version: '1.0.0',
-        peerDependencies: { dep1: '^1.0.0' },
+        devDependencies: { dep1: '^1.0.0' },
       });
       fs.addPackage({ name: 'dep1', version: '1.0.0' });
 
@@ -283,6 +297,20 @@ describe('PackageResolution', () => {
 
       expect(root.resolveDependency(dep2v2)).toBeNull();
       expect(root.resolveDependency(dep2v1)).toBeNull();
+    });
+    it('does not resolve uninstalled peer dependency', () => {
+      fs.addPackage(fs.root, {
+        name: 'root',
+        version: '1.0.0',
+        peerDependencies: { dep: '1.0.0' },
+        devDependencies: { dep2: '1.0.0' },
+      });
+      fs.addPackage({ name: 'dep', version: '1.0.0' });
+      root = resolveRootPackage(fs);
+
+      const dep = root.resolveImport('dep');
+
+      expect(root.resolveDependency(dep)).toBeNull();
     });
   });
 });

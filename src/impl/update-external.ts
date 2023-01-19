@@ -12,10 +12,10 @@ export function updateExternal(
   const resolutionRoot = root == null || typeof root === 'string' ? resolveRootPackage(root) : root;
 
   return function isExternalOrBundled(moduleId, importerId, isResolved): boolean | NullValue {
-    const initiallyExternal = isExternal(moduleId, importerId, isResolved);
+    const moduleIdExternal = isExternal(moduleId, importerId, isResolved);
 
-    if (initiallyExternal != null) {
-      return initiallyExternal;
+    if (moduleIdExternal != null) {
+      return moduleIdExternal;
     }
 
     const request = new Unbundle$Request({ resolutionRoot, moduleId, isResolved, importerId });
@@ -25,14 +25,14 @@ export function updateExternal(
 
       if (packageResolution && moduleId !== packageResolution.name) {
         // Try second time with package name.
-        const externalPackage = isExternal(packageResolution.name, importerId, false);
+        const packageIsExternal = isExternal(packageResolution.name, importerId, false);
 
-        if (externalPackage != null) {
-          return externalPackage;
+        if (packageIsExternal != null) {
+          return packageIsExternal;
         }
       }
     }
 
-    return options.external ? options.external(request) : request.detectExternal();
+    return options.isExternal ? options.isExternal(request) : request.detectExternal();
   };
 }

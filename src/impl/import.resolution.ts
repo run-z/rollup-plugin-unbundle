@@ -52,9 +52,7 @@ export abstract class Import$Resolution<TImport extends Import> implements Impor
     } = another;
 
     if (kind === 'implied' || kind === 'synthetic') {
-      return {
-        kind: 'implied',
-      };
+      return { kind };
     }
 
     return null;

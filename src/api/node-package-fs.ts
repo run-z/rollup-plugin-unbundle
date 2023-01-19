@@ -40,17 +40,22 @@ export class NodePackageFS extends PackageFS {
     return importSpec.scheme === 'file' ? importSpec.spec : undefined;
   }
 
-  override resolveName(relativeTo: PackageResolution, name: string): string;
+  override resolveName(relativeTo: PackageResolution, name: string): string | undefined {
+    const requireModule = createRequire(relativeTo.uri);
+    let modulePath: string;
 
-  override resolveName({ uri }: PackageResolution, name: string): string {
-    const requireModule = createRequire(uri);
+    try {
+      modulePath = requireModule.resolve(name);
+    } catch (error) {
+      return; // Ignore unresolved package.
+    }
 
-    return pathToFileURL(requireModule.resolve(name)).href;
+    return this.findPackageDir(pathToFileURL(modulePath).href)?.uri;
   }
 
   override loadPackageJson(uri: string): PackageJson | undefined {
     const dir = fileURLToPath(uri);
-    const filePath = path.resolve(dir, 'package.json');
+    const filePath = path.join(dir, 'package.json');
 
     try {
       if (!fs.statSync(filePath).isFile()) {
