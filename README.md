@@ -12,7 +12,7 @@ package name. It is not so simple to decide whether the module should be externa
 
 **The solution.** This plugin does the following:
 
-- Externalizes Node.js built-ins unconditionally.
+- Externalizes Node.js built-ins.
 
 - Externalizes packages listed as [package dependencies].
 
@@ -55,13 +55,16 @@ import unbundle from 'rollup-plugin-unbundle';
 
 export default {
   input: './src/index.js',
-  plugins: [nodeResolve(), unbundle()],
+  plugins: [nodeResolve(), unbundle(/* Unbundle options */)],
   external: [
     /*
       List external deps here.
 
       These can be package names, even though they are not necessarily listed
       in `package.json`.
+
+      If you provide a function instead, make it return `null` or `undefined`
+      to allow the plugin to decide.
     */
   ],
   output: {
@@ -71,3 +74,43 @@ export default {
   },
 };
 ```
+
+## Options
+
+The plugin utilizes import resolution API to make decisions. Some of its behavior can be customized with appropriate
+options.
+
+> See the [API documentation] for the details.
+
+### `resolutionRoot`
+
+Either a path to the root package, or an `ImportResolution` class instance.
+
+All imports will be resolved against this root.
+
+By default, new resolution root will be created for current package.
+
+### `external`
+
+A method that decides whether to bundle the module or not.
+
+Unlike an [external] Rollup option, this method accepts `UnbundleRequest` class instance that helps making decisions.
+It has the following properties and methods:
+
+- `resolutionRoot` - Imports resolution root.
+
+- `moduleId` - The identifier of the module in question.
+
+- `isResolved` - Whether the module {@link moduleId identifier} has been resolved by e.g. plugins.
+
+- `importerId` - The identifier of the module doing the import.
+
+- `getResolutionBase()` - Detects module resolution base.
+
+  I.e. either importer module, or resolution root when the latter is missing.
+
+- `resolveModule()` - Resolves the target module against resolution base.
+
+- `detectExternal()` - Checks whether the module should be bundled or not, as the plugin will do by default.
+
+  This can be used to retain the default plugin functionality for some modules.
