@@ -41,10 +41,8 @@ export class ImportResolver {
     return this.#addResolution(createResolution?.() ?? this.#createDefaultResolution(spec));
   }
 
-  #createDefaultResolution(spec: Import): ImportResolution {
+  #createDefaultResolution(spec: Exclude<Import, Import.URI>): ImportResolution {
     switch (spec.kind) {
-      case 'uri':
-        return this.resolveURI(spec);
       case 'implied':
       case 'package':
       case 'path':
