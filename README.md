@@ -91,7 +91,7 @@ Either a path to the root package, or an `ImportResolution` class instance.
 
 All imports will be resolved against this root.
 
-By default, new resolution root will be created for current package.
+Current package is used as resolution root by default.
 
 ### `isExternal`
 
@@ -104,16 +104,16 @@ It has the following properties and methods:
 
 - `moduleId` - The identifier of the module in question.
 
-- `isResolved` - Whether the module {@link moduleId identifier} has been resolved by e.g. plugins.
+- `isResolved` - Whether the module has been resolved by e.g. plugins.
 
-- `importerId` - The identifier of the module doing the import.
+- `importerId` - The identifier of the module doing the import, if known.
 
 - `getResolutionBase()` - Detects module resolution base.
 
-  I.e. either importer module, or resolution root when the latter is missing.
+  Either the importer module, or resolution root when the former is missing.
 
 - `resolveModule()` - Resolves the target module against resolution base.
 
-- `detectExternal()` - Checks whether the module should be bundled or not, as the plugin will do by default.
+- `detectExternal()` - Checks whether the module should be bundled or not according to default plugin logic.
 
   This can be used to retain the default plugin functionality for some modules.
