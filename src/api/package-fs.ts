@@ -1,3 +1,4 @@
+import { ImportResolution } from './import-resolution.js';
 import { Import } from './import.js';
 import { PackageJson } from './package-json.js';
 import { PackageResolution } from './package-resolution.js';
@@ -17,13 +18,13 @@ export abstract class PackageFS {
   abstract get root(): string;
 
   /**
-   * Extracts package URI from the given URI import specifier can be used to access packages.
+   * Extracts package URI from compatible URI import specifier.
    *
    * @param importSpec - Absolute URI import specifier.
    *
    * @returns Either package URI, or `undefined` if the URI can not be used to access packages.
    */
-  abstract getPackageURI(importSpec: Import.URI): string | undefined;
+  abstract recognizePackageURI(importSpec: Import.URI): string | undefined;
 
   /**
    * Tries to load `package.json` from the given directory.
@@ -49,22 +50,25 @@ export abstract class PackageFS {
    *
    * By default, uses URI resolution.
    *
-   * @param relativeTo - Package to resolve the `path` against.
-   * @param path - Path to resolve.
+   * @param relativeTo - The base to resolve the `path` against.
+   * @param path - Path or URI to resolve.
    *
    * @returns URI of the resolved path.
    */
-  resolvePath(relativeTo: PackageResolution, path: string): string | URL {
+  resolvePath(relativeTo: ImportResolution, path: string): string | URL {
     return new URL(path, relativeTo.uri);
   }
 
   /**
    * Resolves a package by name against another one.
    *
+   * Note that returned URI is not necessary the one of package directory. Call {@link findPackageDir} in order
+   * to find one.
+   *
    * @param relativeTo - Package to resolve another one against.
    * @param name - Package name to resolve.
    *
-   * @returns URI of the resolved package directory, or `undefined` if the name can not be resolved.
+   * @returns Resolved module URI, or `undefined` if the name can not be resolved.
    */
   abstract resolveName(relativeTo: PackageResolution, name: string): string | undefined;
 
@@ -76,25 +80,27 @@ export abstract class PackageFS {
    * @returns Either enclosing package directory, or `undefined` if not found.
    */
   findPackageDir(uri: string): PackageFS.PackageDir | undefined {
-    const packageJson = this.loadPackageJson(uri);
+    for (;;) {
+      const packageJson = this.loadPackageJson(uri);
 
-    if (packageJson) {
-      return {
-        uri,
-        packageJson,
-      };
+      if (packageJson) {
+        return {
+          uri,
+          packageJson,
+        };
+      }
+
+      // No valid `package.json` found in directory.
+      // Try the parent directory.
+      const parentURI = this.parentDir(uri);
+
+      if (!parentURI) {
+        // No parent directory.
+        return;
+      }
+
+      uri = parentURI;
     }
-
-    // No valid `package.json` found in directory.
-    // Try the parent directory.
-    const parentURI = this.parentDir(uri);
-
-    if (!parentURI) {
-      // No parent directory.
-      return;
-    }
-
-    return this.findPackageDir(parentURI);
   }
 
 }

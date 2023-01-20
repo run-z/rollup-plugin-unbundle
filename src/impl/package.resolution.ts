@@ -5,11 +5,11 @@ import { Import, recognizeImport } from '../api/import.js';
 import { PackageJson } from '../api/package-json.js';
 import { PackageResolution } from '../api/package-resolution.js';
 import { ImportResolver } from './import-resolver.js';
-import { Import$Resolution } from './import.resolution.js';
-import { uriToImport } from './uri-to-import.js';
+import { Module$Resolution } from './module.resolution.js';
+import { parseRange } from './parse-range.js';
 
 export class Package$Resolution
-  extends Import$Resolution<Import.Package>
+  extends Module$Resolution<Import.Package>
   implements PackageResolution {
 
   readonly #resolver: ImportResolver;
@@ -24,8 +24,13 @@ export class Package$Resolution
     packageJson?: PackageJson,
   ) {
     super(resolver, uri, importSpec ?? (() => packageImportSpec(this)));
+
     this.#resolver = resolver;
     this.#packageJson = packageJson;
+  }
+
+  override get host(): this {
+    return this;
   }
 
   /**
@@ -59,21 +64,6 @@ export class Package$Resolution
     return this.packageJson.version;
   }
 
-  override resolveImport(spec: Import | string): ImportResolution {
-    spec = recognizeImport(spec);
-
-    switch (spec.kind) {
-      case 'uri':
-        return this.#resolveURI(spec);
-      case 'path':
-        return this.#resolvePath(spec.spec);
-      case 'package':
-        return this.#resolveName(spec.name) ?? this.#resolver.resolve(spec);
-      default:
-        return this.#resolver.resolve(spec);
-    }
-  }
-
   #getPeerDependencies(): PackageJson.Dependencies {
     if (this.#peerDependencies) {
       return this.#peerDependencies;
@@ -103,42 +93,6 @@ export class Package$Resolution
     return (this.#peerDependencies = installedDeps);
   }
 
-  #resolveURI(spec: Import.URI): ImportResolution {
-    const packageURI = this.#resolver.packageFS.getPackageURI(spec);
-
-    if (packageURI != null) {
-      return this.#resolvePath(spec.spec);
-    }
-
-    // Non-package URI.
-    return this.#resolver.resolveURI(spec);
-  }
-
-  #resolvePath(path: string): ImportResolution {
-    const uriImport = uriToImport(this.#resolver.packageFS.resolvePath(this, path));
-
-    return this.#resolver.resolveURI(uriImport, () => this.#discoverPackage(uriImport.spec));
-  }
-
-  #resolveName(name: string): ImportResolution | undefined {
-    return this.#resolver.resolveName(name, '*', () => this.#resolveDep(name));
-  }
-
-  #discoverPackage(resolvedURI: string): ImportResolution | undefined {
-    const packageDir = this.#resolver.packageFS.findPackageDir(resolvedURI);
-
-    if (!packageDir) {
-      return;
-    }
-
-    const { uri, packageJson } = packageDir;
-
-    return this.#resolver.resolveURI(
-      uriToImport(new URL(uri)),
-      () => new Package$Resolution(this.#resolver, uri, undefined, packageJson),
-    );
-  }
-
   override resolveDependency(another: ImportResolution): DependencyResolution | null {
     const importDependency = super.resolveDependency(another);
 
@@ -146,7 +100,7 @@ export class Package$Resolution
       return importDependency;
     }
 
-    const pkg = another.asPackageResolution();
+    const pkg = another.asPackage();
 
     if (!pkg) {
       return null;
@@ -158,7 +112,7 @@ export class Package$Resolution
     if (depsByVersion) {
       const packageDep = depsByVersion.get(version);
 
-      if (packageDep && semver.satisfies(version, packageDep.range)) {
+      if (packageDep && packageDep.range.test(version)) {
         return { kind: packageDep.kind };
       }
       if (packageDep != null) {
@@ -193,9 +147,9 @@ export class Package$Resolution
     }
 
     const { name, version } = pkg;
-    const range = dependencies[name];
+    const range = parseRange(dependencies[name]);
 
-    if (!range || !semver.satisfies(version, range)) {
+    if (!range?.test(version)) {
       return null;
     }
 
@@ -213,22 +167,31 @@ export class Package$Resolution
       return null;
     }
 
-    for (const [depName, range] of Object.entries(dependencies)) {
-      const dependency = this.#resolver
-        .resolveName(depName, range, () => this.#resolveDep(depName))
-        ?.resolveDependency(pkg);
+    for (const [depName, rangeStr] of Object.entries(dependencies)) {
+      const range = parseRange(rangeStr);
 
-      if (dependency) {
-        this.#saveDep(pkg, { kind, range, pkg });
+      if (range) {
+        const dependency = this.#resolver
+          .resolveName(depName, range, () => this.resolveDep(depName))
+          ?.resolveDependency(pkg);
 
-        return { kind };
+        if (dependency) {
+          this.#saveDep(pkg, { kind, range, pkg });
+
+          return { kind };
+        }
+
+        this.#saveDep(pkg, false);
       }
     }
 
     return null;
   }
 
-  #saveDep({ name, version }: PackageResolution, dep: PackageDep | false): void {
+  #saveDep(
+    { name, version }: { readonly name: string; readonly version: string },
+    dep: PackageDep | false,
+  ): void {
     let depsByVersion = this.#dependencies.get(name);
 
     if (depsByVersion == null) {
@@ -239,17 +202,7 @@ export class Package$Resolution
     depsByVersion.set(version, dep);
   }
 
-  #resolveDep(depName: string): PackageResolution | undefined {
-    if (depName === this.name) {
-      return this; // Resolve to itself.
-    }
-
-    const packageURI = this.#resolver.packageFS.resolveName(this, depName);
-
-    return packageURI ? new Package$Resolution(this.#resolver, packageURI) : undefined;
-  }
-
-  override asPackageResolution(): this {
+  override asPackage(): this {
     return this;
   }
 
@@ -277,6 +230,6 @@ export interface Package$Resolution extends PackageResolution {
 }
 
 interface PackageDep extends DependencyResolution {
-  readonly range: string;
+  readonly range: semver.Range;
   readonly pkg: PackageResolution;
 }

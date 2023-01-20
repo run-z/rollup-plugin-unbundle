@@ -14,7 +14,7 @@ describe('NodePackageFS', () => {
   describe('getPackageURI', () => {
     it('ignores non-file URLs', () => {
       expect(
-        fs.getPackageURI(recognizeImport('http:///localhost/pkg') as Import.URI),
+        fs.recognizePackageURI(recognizeImport('http:///localhost/pkg') as Import.URI),
       ).toBeUndefined();
     });
   });

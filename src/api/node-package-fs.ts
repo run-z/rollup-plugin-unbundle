@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import semver from 'semver';
 import { Import } from './import.js';
 import { PackageFS } from './package-fs.js';
 import { PackageJson } from './package-json.js';
@@ -36,7 +37,7 @@ export class NodePackageFS extends PackageFS {
     return this.#root;
   }
 
-  override getPackageURI(importSpec: Import.URI): string | undefined {
+  override recognizePackageURI(importSpec: Import.URI): string | undefined {
     return importSpec.scheme === 'file' ? importSpec.spec : undefined;
   }
 
@@ -50,7 +51,7 @@ export class NodePackageFS extends PackageFS {
       return; // Ignore unresolved package.
     }
 
-    return this.findPackageDir(pathToFileURL(modulePath).href)?.uri;
+    return pathToFileURL(modulePath).href;
   }
 
   override loadPackageJson(uri: string): PackageJson | undefined {
@@ -67,7 +68,7 @@ export class NodePackageFS extends PackageFS {
 
     const packageJson = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Partial<PackageJson>;
 
-    if (packageJson.name && packageJson.version) {
+    if (packageJson.name && semver.valid(packageJson.version)) {
       // Valid `package.json`?
       return packageJson as PackageJson;
     }

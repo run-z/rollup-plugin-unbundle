@@ -1,6 +1,6 @@
 import { dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import semver from 'semver';
+import { parseRange } from '../impl/parse-range.js';
 import { Import } from './import.js';
 import { PackageFS } from './package-fs.js';
 import { PackageJson } from './package-json.js';
@@ -126,7 +126,7 @@ export class VirtualPackageFS extends PackageFS {
     this.#byURI.delete(existing.uri);
   }
 
-  override getPackageURI(importSpec: Import.URI): string | undefined {
+  override recognizePackageURI(importSpec: Import.URI): string | undefined {
     return importSpec.scheme === 'package' ? importSpec.spec : undefined;
   }
 
@@ -161,9 +161,9 @@ export class VirtualPackageFS extends PackageFS {
       return;
     }
 
-    const range = dependencies[name];
+    const range = parseRange(dependencies[name]);
 
-    if (range == null) {
+    if (!range) {
       return;
     }
 
@@ -171,7 +171,7 @@ export class VirtualPackageFS extends PackageFS {
 
     if (byVersion) {
       for (const [version, { uri }] of byVersion) {
-        if (semver.satisfies(version, range)) {
+        if (range.test(version)) {
           return uri;
         }
       }

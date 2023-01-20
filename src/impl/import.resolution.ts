@@ -30,6 +30,10 @@ export abstract class Import$Resolution<TImport extends Import> implements Impor
     return this.#resolver.root;
   }
 
+  get host(): PackageResolution | undefined {
+    return;
+  }
+
   get uri(): string {
     return this.#uri;
   }
@@ -42,9 +46,15 @@ export abstract class Import$Resolution<TImport extends Import> implements Impor
 
   resolveDependency(another: ImportResolution): DependencyResolution | null {
     if (another.uri === this.uri) {
-      return {
-        kind: 'self',
-      };
+      // Import itself.
+      return { kind: 'self' };
+    }
+
+    const { host } = this;
+
+    if (host && host.uri === another.host?.uri) {
+      // Import submodule of the same host.
+      return { kind: 'self' };
     }
 
     const {
@@ -58,7 +68,7 @@ export abstract class Import$Resolution<TImport extends Import> implements Impor
     return null;
   }
 
-  asPackageResolution(): PackageResolution | undefined {
+  asPackage(): PackageResolution | undefined {
     return;
   }
 
