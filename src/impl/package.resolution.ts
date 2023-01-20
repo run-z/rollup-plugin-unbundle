@@ -100,7 +100,8 @@ export class Package$Resolution
       return importDependency;
     }
 
-    const pkg = another.asPackage();
+    // Find dependency on host package.
+    const pkg = another.host;
 
     if (!pkg) {
       return null;

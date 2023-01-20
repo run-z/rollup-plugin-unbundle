@@ -74,7 +74,7 @@ export class Unbundle$Request implements UnbundleRequest {
     }
 
     // Externalize implied, runtime and peer dependencies.
-    // Bundle development everything else (e.g. development dependencies).
+    // Bundle everything else (e.g. development dependencies).
     return kind === 'implied' || kind === 'runtime' || kind === 'peer';
   }
 

@@ -52,9 +52,16 @@ export abstract class Import$Resolution<TImport extends Import> implements Impor
 
     const { host } = this;
 
-    if (host && host.uri === another.host?.uri) {
-      // Import submodule of the same host.
-      return { kind: 'self' };
+    if (host) {
+      if (host.uri === another.host?.uri) {
+        // Import submodule of the same host.
+        return { kind: 'self' };
+      }
+
+      if (host.uri !== this.uri) {
+        // Resolve host package dependency instead.
+        return host.resolveDependency(another);
+      }
     }
 
     const {

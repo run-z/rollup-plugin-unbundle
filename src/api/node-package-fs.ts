@@ -62,7 +62,7 @@ export class NodePackageFS extends PackageFS {
       if (!fs.statSync(filePath).isFile()) {
         return;
       }
-    } catch (error) {
+    } catch {
       return;
     }
 

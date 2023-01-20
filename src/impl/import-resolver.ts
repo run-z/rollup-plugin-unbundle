@@ -143,7 +143,7 @@ export class ImportResolver {
         return pkg;
       }
 
-      const host = pkg.asPackage();
+      const { host } = pkg;
 
       return host && new Submodule$Resolution(this, spec, host);
     });

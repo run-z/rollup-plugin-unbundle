@@ -155,9 +155,27 @@ describe('PackageResolution', () => {
     it('resolves self-dependency', () => {
       expect(root.resolveDependency(root)).toEqual({ kind: 'self' });
     });
-    it('resolves submodule dependency', () => {
+    it('resolves dependency on submodule', () => {
       expect(root.resolveDependency(root.resolveImport(root.uri + '/test/submodule'))).toEqual({
         kind: 'self',
+      });
+    });
+    it('resolves submodule dependency on another package submodule', () => {
+      fs.addPackage('package:test', {
+        name: 'test',
+        version: '1.0.0',
+        dependencies: { dep: '^1.0.0' },
+      });
+      fs.addPackage('package:dep', {
+        name: 'dep',
+        version: '1.0.0',
+      });
+
+      const dependant = root.resolveImport('package:test/dist/test.js');
+      const dependency = root.resolveImport('package:dep/dist/lib.js');
+
+      expect(dependant.resolveDependency(dependency)).toEqual({
+        kind: 'runtime',
       });
     });
     it('resolves runtime dependency', () => {
