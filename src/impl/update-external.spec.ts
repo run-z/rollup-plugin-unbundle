@@ -72,7 +72,7 @@ describe('updateExternal', () => {
       resolutionRoot: resolveRootPackage(findRollupDir()),
       isExternal(request) {
         return request.isResolved
-          ? request.resolveModule().asPackageResolution()?.name === 'acorn'
+          ? request.resolveModule().asPackage()?.name === 'acorn'
           : request.detectExternal();
       },
     });

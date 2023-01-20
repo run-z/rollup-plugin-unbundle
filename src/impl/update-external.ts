@@ -21,7 +21,7 @@ export function updateExternal(
     const request = new Unbundle$Request({ resolutionRoot, moduleId, isResolved, importerId });
 
     if (!isResolved) {
-      const packageResolution = request.resolveModule().asPackageResolution();
+      const packageResolution = request.resolveModule().asPackage();
 
       if (packageResolution && moduleId !== packageResolution.name) {
         // Try second time with package name.

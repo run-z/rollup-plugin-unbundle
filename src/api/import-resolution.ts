@@ -16,6 +16,13 @@ export interface ImportResolution {
   get root(): ImportResolution;
 
   /**
+   * Host package resolution.
+   *
+   * Set e.g. for package sub-module resolutions.
+   */
+  get host(): PackageResolution | undefined;
+
+  /**
    * Resolved import specifier.
    */
   get importSpec(): Import;
@@ -50,5 +57,5 @@ export interface ImportResolution {
    *
    * @returns `this` instance for package resolution, or `undefined` otherwise.
    */
-  asPackageResolution(): PackageResolution | undefined;
+  asPackage(): PackageResolution | undefined;
 }

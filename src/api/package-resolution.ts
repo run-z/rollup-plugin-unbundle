@@ -13,7 +13,12 @@ import { PackageJson } from './package-json.js';
  */
 export interface PackageResolution extends ImportResolution {
   /**
-   * URI of package.
+   * The package is a host inside of itself.
+   */
+  get host(): this;
+
+  /**
+   * URI of package directory.
    */
   get uri(): string;
 
@@ -46,7 +51,7 @@ export interface PackageResolution extends ImportResolution {
    */
   get version(): string;
 
-  asPackageResolution(): this;
+  asPackage(): this;
 }
 
 /**
@@ -66,5 +71,5 @@ export function resolveRootPackage(dirOrFS?: string | PackageFS): PackageResolut
   return new ImportResolver({
     createRoot: resolver => new Package$Resolution(resolver, packageFS.root),
     packageFS,
-  }).root.asPackageResolution()!;
+  }).root.asPackage()!;
 }

@@ -23,7 +23,7 @@ describe('ImportResolution', () => {
 
     describe('asPackageResolution', () => {
       it('returns none', () => {
-        expect(resolution.asPackageResolution()).toBeUndefined();
+        expect(resolution.asPackage()).toBeUndefined();
       });
     });
 

@@ -93,9 +93,9 @@ All imports will be resolved against this root.
 
 By default, new resolution root will be created for current package.
 
-### `external`
+### `isExternal`
 
-A method that decides whether to bundle the module or not.
+This method decides whether to bundle the module or not.
 
 Unlike an [external] Rollup option, this method accepts `UnbundleRequest` class instance that helps making decisions.
 It has the following properties and methods:
