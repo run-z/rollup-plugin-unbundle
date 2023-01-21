@@ -42,9 +42,7 @@ export interface ImportResolution {
   resolveImport(spec: Import | string): ImportResolution;
 
   /**
-   * Resolves the dependency of the module on another one `another`.
-   *
-   * Follows transient when possible.
+   * Resolves direct dependency of the module on `another` one.
    *
    * @param another - The package to check.
    *

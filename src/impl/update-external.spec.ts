@@ -26,9 +26,9 @@ describe('updateExternal', () => {
     baseExternal = () => null;
     expect(isExternal('node:fs', undefined, false)).toBe(true);
   });
-  it('externalizes unresolved dependency', () => {
+  it('bundles unresolved dependency', () => {
     baseExternal = () => null;
-    expect(isExternal('@test/test', undefined, false)).toBe(true);
+    expect(isExternal('@test/test', undefined, false)).toBe(false);
   });
   it('does not affect self-dependencies', () => {
     baseExternal = () => null;
@@ -90,7 +90,7 @@ describe('updateExternal', () => {
     baseExternal = () => null;
 
     // `acorn` is Rollup's dev dependency
-    expect(isExternal('acorn', 'rollup', false)).toBe(true);
+    expect(isExternal('acorn', 'rollup', false)).toBe(false);
   });
 
   function findRollupDir(): string {

@@ -61,8 +61,8 @@ export class Unbundle$Request implements UnbundleRequest {
 
     if (!dependency) {
       // Something is imported, but no dependency declared.
-      // Externalize it.
-      return true;
+      // Bundle it.
+      return false;
     }
 
     const { kind } = dependency;

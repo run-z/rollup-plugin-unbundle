@@ -1,4 +1,3 @@
-import semver from 'semver';
 import { DependencyResolution } from '../api/dependency-resolution.js';
 import { ImportResolution } from '../api/import-resolution.js';
 import { Import, recognizeImport } from '../api/import.js';
@@ -14,7 +13,7 @@ export class Package$Resolution
 
   readonly #resolver: ImportResolver;
   #packageJson: PackageJson | undefined;
-  readonly #dependencies = new Map<string, Map<string, PackageDep | false>>();
+  readonly #dependencies = new Map<string, PackageDep | false>();
   #peerDependencies?: PackageJson.Dependencies;
 
   constructor(
@@ -107,42 +106,29 @@ export class Package$Resolution
       return null;
     }
 
-    const { name, version } = pkg;
-    const depsByVersion = this.#dependencies.get(name);
+    const knownDep = this.#dependencies.get(pkg.uri);
 
-    if (depsByVersion) {
-      const packageDep = depsByVersion.get(version);
-
-      if (packageDep && packageDep.range.test(version)) {
-        return { kind: packageDep.kind };
-      }
-      if (packageDep != null) {
-        return null;
-      }
+    if (knownDep != null) {
+      return knownDep ? { kind: knownDep.kind } : null;
     }
 
     const { dependencies, devDependencies } = this.packageJson;
 
-    const dependency =
-      this.#establishDirectDep(pkg, dependencies, 'runtime')
-      || this.#establishDirectDep(pkg, this.#getPeerDependencies(), 'peer')
-      || this.#establishDirectDep(pkg, devDependencies, 'dev')
-      || this.#establishTransientDep(pkg, dependencies, 'runtime')
-      || this.#establishTransientDep(pkg, this.#getPeerDependencies(), 'peer')
-      || this.#establishTransientDep(pkg, devDependencies, 'dev');
+    const dep =
+      this.#findDep(pkg, dependencies, 'runtime')
+      || this.#findDep(pkg, this.#getPeerDependencies(), 'peer')
+      || this.#findDep(pkg, devDependencies, 'dev');
 
-    if (!dependency) {
-      this.#saveDep(pkg, false);
-    }
+    this.#dependencies.set(pkg.uri, dep ? dep : false);
 
-    return dependency;
+    return dep && { kind: dep.kind };
   }
 
-  #establishDirectDep(
+  #findDep(
     pkg: PackageResolution,
     dependencies: PackageJson.Dependencies | undefined,
     kind: DependencyResolution['kind'],
-  ): DependencyResolution | null {
+  ): PackageDep | null {
     if (!dependencies) {
       return null;
     }
@@ -154,53 +140,7 @@ export class Package$Resolution
       return null;
     }
 
-    this.#saveDep(pkg, { kind, range, pkg });
-
-    return { kind };
-  }
-
-  #establishTransientDep(
-    pkg: PackageResolution,
-    dependencies: PackageJson.Dependencies | undefined,
-    kind: DependencyResolution['kind'],
-  ): DependencyResolution | null {
-    if (!dependencies) {
-      return null;
-    }
-
-    for (const [depName, rangeStr] of Object.entries(dependencies)) {
-      const range = parseRange(rangeStr);
-
-      if (range) {
-        const dependency = this.#resolver
-          .resolveName(depName, range, () => this.resolveDep(depName))
-          ?.resolveDependency(pkg);
-
-        if (dependency) {
-          this.#saveDep(pkg, { kind, range, pkg });
-
-          return { kind };
-        }
-
-        this.#saveDep(pkg, false);
-      }
-    }
-
-    return null;
-  }
-
-  #saveDep(
-    { name, version }: { readonly name: string; readonly version: string },
-    dep: PackageDep | false,
-  ): void {
-    let depsByVersion = this.#dependencies.get(name);
-
-    if (depsByVersion == null) {
-      depsByVersion = new Map();
-      this.#dependencies.set(name, depsByVersion);
-    }
-
-    depsByVersion.set(version, dep);
+    return { kind, pkg };
   }
 
   override asPackage(): this {
@@ -231,6 +171,5 @@ export interface Package$Resolution extends PackageResolution {
 }
 
 interface PackageDep extends DependencyResolution {
-  readonly range: semver.Range;
   readonly pkg: PackageResolution;
 }
