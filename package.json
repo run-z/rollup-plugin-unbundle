@@ -22,9 +22,16 @@
   },
   "types": "./dist/unbundle.plugin.d.ts",
   "exports": {
-    "types": "./dist/unbundle.plugin.d.ts",
-    "import": "./dist/unbundle.plugin.js",
-    "require": "./dist/unbundle.plugin.cjs"
+    ".": {
+      "types": "./dist/unbundle.plugin.d.ts",
+      "require": "./dist/unbundle.plugin.cjs",
+      "default": "./dist/unbundle.plugin.js"
+    },
+    "./api": {
+      "types": "./dist/unbundle.api.d.ts",
+      "require": "./dist/unbundle.api.cjs",
+      "default": "./dist/unbundle.api.js"
+    }
   },
   "peerDependencies": {
     "rollup": "2.79.1 - 4.0"
