@@ -33,6 +33,6 @@ export function updateExternal(
       }
     }
 
-    return options.isExternal ? options.isExternal(request) : request.detectExternal();
+    return options.isExternal ? options.isExternal(request) : request.isExternal();
   };
 }

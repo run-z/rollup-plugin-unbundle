@@ -34,26 +34,26 @@ export interface UnbundleRequest {
   get importerId(): string | undefined;
 
   /**
-   * Detects module resolution base.
+   * Resolves the module doing the import.
    *
    * @returns Either resolved {@link importerId importer module}, or {@link resolutionRoot resolution root}
    * when the latter is missing.
    */
-  getResolutionBase(): ImportResolution;
+  resolveImporter(): ImportResolution;
 
   /**
-   * Resolves the {@link moduleId target module} against {@link getResolutionBase resolution base}.
+   * Resolves the {@link moduleId module in question}.
    *
    * @returns Imported module resolution.
    */
   resolveModule(): ImportResolution;
 
   /**
-   * Checks whether the module should be bundled or not, as the plugin will do by default.
+   * Checks whether the module should be bundled or not according to default plugin logic.
    *
    * This can be used to retain the default plugin functionality for some modules.
    *
-   * @returns `true` to externalize module, `false` to bundle it, or `null`/`undefined` to make Rollup to decide.
+   * @returns `true` to externalize the module, `false` to bundle it, or `null`/`undefined` to make Rollup to decide.
    */
-  detectExternal(): boolean | NullValue;
+  isExternal(): boolean | NullValue;
 }

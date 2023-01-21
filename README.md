@@ -108,12 +108,12 @@ It has the following properties and methods:
 
 - `importerId` - The identifier of the module doing the import, if known.
 
-- `getResolutionBase()` - Detects module resolution base.
+- `resolveImporter()` - Resolves the module doing the import.
 
   Either the importer module, or resolution root when the former is missing.
 
-- `resolveModule()` - Resolves the target module against resolution base.
+- `resolveModule()` - Resolves the module in question.
 
-- `detectExternal()` - Checks whether the module should be bundled or not according to default plugin logic.
+- `isExternal()` - Checks whether the module should be bundled or not according to default plugin logic.
 
   This can be used to retain the default plugin functionality for some modules.

@@ -73,7 +73,7 @@ describe('updateExternal', () => {
       isExternal(request) {
         return request.isResolved
           ? request.resolveModule().asPackage()?.name === 'acorn'
-          : request.detectExternal();
+          : request.isExternal();
       },
     });
 

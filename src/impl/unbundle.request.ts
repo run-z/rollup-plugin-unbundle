@@ -45,7 +45,7 @@ export class Unbundle$Request implements UnbundleRequest {
     return this.#importerId;
   }
 
-  getResolutionBase(): ImportResolution {
+  resolveImporter(): ImportResolution {
     const { resolutionRoot, importerId } = this;
 
     return (this.#resolutionBase ??=
@@ -53,10 +53,10 @@ export class Unbundle$Request implements UnbundleRequest {
   }
 
   resolveModule(): ImportResolution {
-    return (this.#moduleResolution ??= this.getResolutionBase().resolveImport(this.moduleId));
+    return (this.#moduleResolution ??= this.resolveImporter().resolveImport(this.moduleId));
   }
 
-  detectExternal(): boolean | NullValue {
+  isExternal(): boolean | NullValue {
     const dependency = this.resolutionRoot.resolveDependency(this.resolveModule());
 
     if (!dependency) {
