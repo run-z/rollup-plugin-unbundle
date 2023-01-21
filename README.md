@@ -27,10 +27,7 @@ package name. It is not so simple to decide whether the module should be externa
 
 - Respects [external] option from Rollup configuration.
 
-- Handles transitive dependencies.
-
-  Once a transitive dependency (not listed in `package.json` or [external] option) imported, it is either externalized
-  or bundled the same way as its importer.
+- Bundles the rest of the dependencies.
 
 [npm-image]: https://img.shields.io/npm/v/rollup-plugin-unbundle.svg?logo=npm
 [npm-url]: https://www.npmjs.com/package/rollup-plugin-unbundle

@@ -226,54 +226,6 @@ describe('PackageResolution', () => {
         kind: 'peer',
       });
     });
-    it('resolves transient dependency', () => {
-      fs.addPackage(fs.root, { name: 'root', version: '1.0.0', dependencies: { dep1: '^1.0.0' } });
-      fs.addPackage({ name: 'dep1', version: '1.0.0', devDependencies: { dep2: '^1.0.0' } });
-      fs.addPackage({ name: 'dep2', version: '1.0.0' });
-
-      root = resolveRootPackage(fs);
-
-      const dep2 = root.resolveImport('package:dep2/1.0.0').asPackage()!;
-
-      expect(root.resolveDependency(dep2)).toEqual({
-        kind: 'runtime',
-      });
-    });
-    it('resolves transient dev dependency', () => {
-      fs.addPackage(fs.root, {
-        name: 'root',
-        version: '1.0.0',
-        devDependencies: { dep1: '1.0.0' },
-      });
-      fs.addPackage({ name: 'dep1', version: '1.0.0', dependencies: { dep2: '^1.0.0' } });
-      fs.addPackage({ name: 'dep2', version: '1.0.0' });
-
-      root = resolveRootPackage(fs);
-
-      const dep2 = root.resolveImport('package:dep2/1.0.0').asPackage()!;
-
-      expect(root.resolveDependency(dep2)).toEqual({
-        kind: 'dev',
-      });
-    });
-    it('resolves transient peer dependency', () => {
-      fs.addPackage(fs.root, {
-        name: 'root',
-        version: '1.0.0',
-        peerDependencies: { dep1: '1.0.0' },
-        devDependencies: { dep1: '1.0.0' },
-      });
-      fs.addPackage({ name: 'dep1', version: '1.0.0', dependencies: { dep2: '^1.0.0' } });
-      fs.addPackage({ name: 'dep2', version: '1.0.0' });
-
-      root = resolveRootPackage(fs);
-
-      const dep2 = root.resolveImport('package:dep2/1.0.0').asPackage()!;
-
-      expect(root.resolveDependency(dep2)).toEqual({
-        kind: 'peer',
-      });
-    });
     it('does not resolve missing dependency', () => {
       const dep = root.resolveImport('test:missing');
 
@@ -294,27 +246,6 @@ describe('PackageResolution', () => {
       expect(root.resolveDependency(dep2)).toBeNull();
       expect(root.resolveDependency(dep1)).toEqual({
         kind: 'runtime',
-      });
-    });
-    it('resolves among multiple dependency versions', () => {
-      fs.addPackage(fs.root, {
-        name: 'root',
-        version: '1.0.0',
-        peerDependencies: { dep1: '^1.0.0' },
-        devDependencies: { dep1: '^1.0.0' },
-      });
-      fs.addPackage({ name: 'dep1', version: '1.0.0', dependencies: { dep2: '^1.0.0' } });
-      fs.addPackage({ name: 'dep2', version: '1.0.0' });
-      fs.addPackage({ name: 'dep2', version: '2.0.0' });
-
-      root = resolveRootPackage(fs);
-
-      const dep2v1 = root.resolveImport('package:dep2/1.0.0').asPackage()!;
-      const dep2v2 = root.resolveImport('package:dep2/2.0.0').asPackage()!;
-
-      expect(root.resolveDependency(dep2v2)).toBeNull();
-      expect(root.resolveDependency(dep2v1)).toEqual({
-        kind: 'peer',
       });
     });
     it('does not resolve among multiple dependency versions', () => {
