@@ -4,7 +4,7 @@ import { ImportResolution } from './api/import-resolution.js';
 /**
  * A request for check whether the module should be bundled or not.
  *
- * An instance of this class is passed to custom {@link UnbundleOptions#external external} method.
+ * An instance of this class is passed to custom {@link UnbundleOptions#isExternal isExternal} method.
  *
  * The properties of this class correspond to [external] Rollup option parameters.
  *
