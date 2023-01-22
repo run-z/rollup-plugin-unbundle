@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { FS_ROOT } from '../impl/fs-root.js';
 import { Import, recognizeImport } from './import.js';
 import { NodePackageFS } from './node-package-fs.js';
 
@@ -21,7 +22,7 @@ describe('NodePackageFS', () => {
 
   describe('parentDir', () => {
     it('returns undefined for root dir', () => {
-      expect(fs.parentDir('file:///')).toBeUndefined();
+      expect(fs.parentDir(FS_ROOT)).toBeUndefined();
     });
   });
 
