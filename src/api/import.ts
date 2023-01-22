@@ -1,7 +1,6 @@
 import { builtinModules } from 'node:module';
 import win32 from 'node:path/win32';
 import { pathToFileURL } from 'node:url';
-import normalizePath from 'normalize-path';
 
 /**
  * Import statement specifier.
@@ -215,7 +214,7 @@ export function recognizeImport(spec: Import | string): Import {
   return (
     IMPORT_SPEC_PARSERS[spec[0]]?.(spec)
     ?? recognizeNodeImport(spec)
-    ?? recognizeAbsoluteWindowsPathImport(spec)
+    ?? recognizeAbsoluteWindowsImport(spec)
     ?? recognizeImportURI(spec)
     ?? recognizePackageImport(spec)
   );
@@ -232,13 +231,13 @@ const IMPORT_SPEC_PARSERS: {
     kind: 'subpath',
     spec: spec as `#${string}`,
   }),
-  '.': spec => recognizeRelativePathImport(spec) ?? {
+  '.': spec => recognizeRelativeImport(spec) ?? {
       // Unscoped package name can not start with dot.
       kind: 'unknown',
       spec,
     },
-  '/': recognizeAbsoluteUnixPathImport,
-  '\\': recognizeAbsoluteWindowsPathImport,
+  '/': recognizeAbsoluteUnixImport,
+  '\\': recognizeUNCWindowsImport,
   '@': recognizeScopedPackageImport,
   _: spec => ({
     // Unscoped package name can not start with underscore
@@ -265,7 +264,7 @@ function getNodeJSBuiltins(): ReadonlySet<string> {
 
 let nodeJSBuiltins: Set<string> | undefined;
 
-function recognizeRelativePathImport(spec: string): Import.Relative | undefined {
+function recognizeRelativeImport(spec: string): Import.Relative | undefined {
   if (spec === '.' || spec === '..') {
     return {
       kind: 'path',
@@ -298,7 +297,7 @@ function recognizeRelativePathImport(spec: string): Import.Relative | undefined 
   return;
 }
 
-function recognizeAbsoluteUnixPathImport(spec: string): Import.Absolute {
+function recognizeAbsoluteUnixImport(spec: string): Import.Absolute {
   return {
     kind: 'path',
     spec,
@@ -307,19 +306,34 @@ function recognizeAbsoluteUnixPathImport(spec: string): Import.Absolute {
   };
 }
 
-function recognizeAbsoluteWindowsPathImport(spec: string): Import.Absolute | undefined {
-  if (!win32.isAbsolute(spec)) {
-    return;
-  }
-
-  const unixPath = normalizePath(spec);
+function recognizeUNCWindowsImport(spec: string): Import.Absolute | undefined {
+  const uncPath = win32.toNamespacedPath(spec);
+  const unixPath = uncPath.replaceAll('\\', '/');
 
   return {
     kind: 'path',
     spec,
     isRelative: false,
-    uri: pathToFileURL(unixPath.startsWith('/') ? unixPath : '/' + unixPath)
-      .href as `file:///${string}`,
+    uri: pathToFileURL(unixPath).href as `file:///${string}`,
+  };
+}
+
+function recognizeAbsoluteWindowsImport(spec: string): Import.Absolute | undefined {
+  if (!win32.isAbsolute(spec)) {
+    return;
+  }
+
+  let unixPath = spec.replaceAll('\\', '/');
+
+  if (!unixPath.startsWith('/')) {
+    unixPath = '/' + unixPath;
+  }
+
+  return {
+    kind: 'path',
+    spec,
+    isRelative: false,
+    uri: pathToFileURL(unixPath).href as `file:///${string}`,
   };
 }
 

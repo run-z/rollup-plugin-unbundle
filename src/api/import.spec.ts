@@ -164,7 +164,7 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec,
         isRelative: false,
-        uri: `file:///server/test%20path`,
+        uri: `file:///%3F/UNC/server/test%20path/`,
       });
     });
     it('recognizes UNC windows path', () => {
@@ -174,7 +174,7 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec,
         isRelative: false,
-        uri: `file:///%3F/UNC/server/test%20path`,
+        uri: `file:///%3F/UNC/server/test%20path/`,
       });
     });
     it('recognizes relative unix path', () => {
