@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
+import { win32 } from 'node:path/win32';
 import { Import, recognizeImport } from './import.js';
 
 describe('recognizeImport', () => {
@@ -108,6 +109,115 @@ describe('recognizeImport', () => {
     });
   });
 
+  describe('import paths', () => {
+    it('recognizes directory path', () => {
+      expect(recognizeImport('.')).toEqual({
+        kind: 'path',
+        spec: '.',
+        isRelative: true,
+        uri: '.',
+      });
+    });
+    it('recognizes parent directory path', () => {
+      expect(recognizeImport('..')).toEqual({
+        kind: 'path',
+        spec: '..',
+        isRelative: true,
+        uri: '..',
+      });
+    });
+    it('recognizes absolute unix path', () => {
+      const spec = '/test path';
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: false,
+        uri: `file:///test%20path`,
+      });
+    });
+    it('recognizes windows path with drive letter', () => {
+      const spec = 'c:\\dir\\test path';
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: false,
+        uri: `file:///c:/dir/test%20path`,
+      });
+    });
+    it('recognizes windows path with prefixed drive letter', () => {
+      const spec = '\\c:\\dir\\test path';
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: false,
+        uri: `file:///c:/dir/test%20path`,
+      });
+    });
+    it('recognizes absolute windows path', () => {
+      const spec = '\\\\server\\test path';
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: false,
+        uri: `file:///%3F/UNC/server/test%20path/`,
+      });
+    });
+    it('recognizes UNC windows path', () => {
+      const spec = win32.toNamespacedPath('\\\\server\\test path');
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: false,
+        uri: `file:///%3F/UNC/server/test%20path/`,
+      });
+    });
+    it('recognizes relative unix path', () => {
+      const spec = './test path';
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: true,
+        uri: './test%20path',
+      });
+    });
+    it('recognizes relative windows path', () => {
+      const spec = '.\\test path';
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: true,
+        uri: './test%20path',
+      });
+    });
+    it('recognizes unix path relative to parent directory', () => {
+      const spec = '../test path';
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: true,
+        uri: '../test%20path',
+      });
+    });
+    it('recognizes windows path relative to parent directory', () => {
+      const spec = '..\\test path';
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: true,
+        uri: '../test%20path',
+      });
+    });
+  });
+
   it('recognizes URI', () => {
     const spec = 'file:///test-path?query';
 
@@ -116,24 +226,6 @@ describe('recognizeImport', () => {
       spec,
       scheme: 'file',
       path: '/test-path',
-    });
-  });
-  it('recognizes absolute path', () => {
-    const spec = '/test-path';
-
-    expect(recognizeImport(spec)).toEqual({
-      kind: 'path',
-      spec,
-      isRelative: false,
-    });
-  });
-  it('recognizes relative path', () => {
-    const spec = './test-path';
-
-    expect(recognizeImport(spec)).toEqual({
-      kind: 'path',
-      spec,
-      isRelative: true,
     });
   });
   it('recognizes synthetic module', () => {
