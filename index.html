@@ -39,9 +39,7 @@ package name. It is not so simple to decide whether the module should be externa
 </li>
 <li><p>Respects <a href="https://rollupjs.org/guide/en/#external">external</a> option from Rollup configuration.</p>
 </li>
-<li><p>Handles transitive dependencies.</p>
-<p>Once a transitive dependency (not listed in <code>package.json</code> or <a href="https://rollupjs.org/guide/en/#external">external</a> option) imported, it is either externalized
-or bundled the same way as its importer.</p>
+<li><p>Bundles the rest of the dependencies.</p>
 </li>
 </ul>
 
@@ -66,7 +64,7 @@ options.</p>
 </a>
 <p>Either a path to the root package, or an <code>ImportResolution</code> class instance.</p>
 <p>All imports will be resolved against this root.</p>
-<p>By default, new resolution root will be created for current package.</p>
+<p>Current package is used as resolution root by default.</p>
 
 <a href="#isexternal" id="isexternal" style="color: inherit; text-decoration: none;">
   <h3><code>isExternal</code></h3>
@@ -79,16 +77,16 @@ It has the following properties and methods:</p>
 </li>
 <li><p><code>moduleId</code> - The identifier of the module in question.</p>
 </li>
-<li><p><code>isResolved</code> - Whether the module moduleId identifier has been resolved by e.g. plugins.</p>
+<li><p><code>isResolved</code> - Whether the module has been resolved by e.g. plugins.</p>
 </li>
-<li><p><code>importerId</code> - The identifier of the module doing the import.</p>
+<li><p><code>importerId</code> - The identifier of the module doing the import, if known.</p>
 </li>
-<li><p><code>getResolutionBase()</code> - Detects module resolution base.</p>
-<p>I.e. either importer module, or resolution root when the latter is missing.</p>
+<li><p><code>resolveImporter()</code> - Resolves the module doing the import.</p>
+<p>Either the importer module, or resolution root when the former is missing.</p>
 </li>
-<li><p><code>resolveModule()</code> - Resolves the target module against resolution base.</p>
+<li><p><code>resolveModule()</code> - Resolves the module in question.</p>
 </li>
-<li><p><code>detectExternal()</code> - Checks whether the module should be bundled or not, as the plugin will do by default.</p>
+<li><p><code>isExternal()</code> - Checks whether the module should be bundled or not according to default plugin logic.</p>
 <p>This can be used to retain the default plugin functionality for some modules.</p>
 </li>
 </ul>
