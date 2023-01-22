@@ -1,5 +1,3 @@
-import { dirname } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseRange } from '../impl/parse-range.js';
 import { Import } from './import.js';
 import { PackageFS } from './package-fs.js';
@@ -135,14 +133,24 @@ export class VirtualPackageFS extends PackageFS {
   }
 
   override parentDir(uri: string): string | undefined {
-    const uriPath = this.#toFilePath(uri);
-    const parentPath = dirname(uriPath);
+    const httpURL = this.#toHttpURL(uri);
+    const path = httpURL.pathname;
 
-    return parentPath !== uriPath ? this.#toPackageURI(pathToFileURL(parentPath).href) : undefined;
+    if (!path.endsWith('/')) {
+      httpURL.pathname = path + '/';
+    }
+
+    const parentURL = new URL('..', httpURL);
+
+    if (parentURL.pathname === httpURL.pathname) {
+      return;
+    }
+
+    return this.#toPackageURI(parentURL);
   }
 
   override resolvePath(relativeTo: PackageResolution, path: string): string | URL {
-    return this.#toPackageURI(new URL(path, this.#toFileURL(relativeTo.uri)));
+    return this.#toPackageURI(new URL(path, this.#toHttpURL(relativeTo.uri)));
   }
 
   override resolveName(relativeTo: PackageResolution, name: string): string | undefined {
@@ -181,16 +189,16 @@ export class VirtualPackageFS extends PackageFS {
   }
 
   #toPackageURI(uri: string | URL): string {
-    const pathname = (typeof uri === 'string' ? new URL(uri) : uri).pathname;
+    let pathname = (typeof uri === 'string' ? new URL(uri) : uri).pathname;
+
+    if (pathname.endsWith('/')) {
+      pathname = pathname.slice(0, -1);
+    }
 
     return 'package:' + (pathname.startsWith('/') ? pathname.slice(1) : pathname);
   }
 
-  #toFilePath(uri: string): string {
-    return fileURLToPath(this.#toFileURL(uri));
-  }
-
-  #toFileURL(uri: string): URL {
+  #toHttpURL(uri: string): URL {
     const pathname = new URL(uri).pathname;
 
     return new URL(pathname.startsWith('/') ? pathname : `/${pathname}`, 'file:///');

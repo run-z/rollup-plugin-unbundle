@@ -1,4 +1,6 @@
 import { builtinModules } from 'node:module';
+import win32 from 'node:path/win32';
+import { pathToFileURL } from 'node:url';
 
 /**
  * Import statement specifier.
@@ -109,14 +111,19 @@ export namespace Import {
     readonly kind: 'path';
 
     /**
+     * Original, system-dependent import path.
+     */
+    readonly spec: string;
+
+    /**
      * Never relative.
      */
     readonly isRelative: false;
 
     /**
-     * Original import path. Always starts with the slash (`/`).
+     * Absolute import URI.
      */
-    readonly spec: `/${string}`;
+    readonly uri: `file:///${string}`;
   }
 
   /**
@@ -126,14 +133,19 @@ export namespace Import {
     readonly kind: 'path';
 
     /**
+     * Original, system-dependent import path.
+     */
+    readonly spec: string;
+
+    /**
      * Always relative.
      */
     readonly isRelative: true;
 
     /**
-     * Original import path. Always starts with the dot (`.`).
+     * Relative import URI.
      */
-    readonly spec: '.' | '..' | `./${string}` | `../${string}`;
+    readonly uri: '.' | '..' | `./${string}` | `../${string}`;
   }
 
   /**
@@ -202,13 +214,14 @@ export function recognizeImport(spec: Import | string): Import {
   return (
     IMPORT_SPEC_PARSERS[spec[0]]?.(spec)
     ?? recognizeNodeImport(spec)
+    ?? recognizeAbsoluteWindowsImport(spec)
     ?? recognizeImportURI(spec)
     ?? recognizePackageImport(spec)
   );
 }
 
 const IMPORT_SPEC_PARSERS: {
-  readonly [prefix: string]: ((spec: string) => Import) | undefined;
+  readonly [prefix: string]: ((spec: string) => Import | undefined) | undefined;
 } = {
   '\0': spec => ({
     kind: 'synthetic',
@@ -218,22 +231,13 @@ const IMPORT_SPEC_PARSERS: {
     kind: 'subpath',
     spec: spec as `#${string}`,
   }),
-  '.': spec => isRelativeImport(spec)
-      ? {
-          kind: 'path',
-          isRelative: true,
-          spec,
-        }
-      : {
-          // Unscoped package name can not start with dot.
-          kind: 'unknown',
-          spec,
-        },
-  '/': spec => ({
-    kind: 'path',
-    isRelative: false,
-    spec: spec as `/${string}`,
-  }),
+  '.': spec => recognizeRelativeImport(spec) ?? {
+      // Unscoped package name can not start with dot.
+      kind: 'unknown',
+      spec,
+    },
+  '/': recognizeAbsoluteUnixImport,
+  '\\': recognizeUNCWindowsImport,
   '@': recognizeScopedPackageImport,
   _: spec => ({
     // Unscoped package name can not start with underscore
@@ -260,8 +264,84 @@ function getNodeJSBuiltins(): ReadonlySet<string> {
 
 let nodeJSBuiltins: Set<string> | undefined;
 
-function isRelativeImport(spec: string): spec is '.' | '..' | `./${string}` | `../${string}` {
-  return spec.startsWith('./') || spec.startsWith('../') || spec === '.' || spec === '..';
+function recognizeRelativeImport(spec: string): Import.Relative | undefined {
+  if (spec === '.' || spec === '..') {
+    return {
+      kind: 'path',
+      spec,
+      isRelative: true,
+      uri: spec,
+    };
+  }
+
+  if (spec.startsWith('./') || spec.startsWith('../')) {
+    // Unix path.
+    return {
+      kind: 'path',
+      spec,
+      isRelative: true,
+      uri: encodeURI(spec) as `./${string}` | `../${string}`,
+    };
+  }
+
+  if (spec.startsWith('.\\') || spec.startsWith('..\\')) {
+    // Windows path.
+    return {
+      kind: 'path',
+      spec,
+      isRelative: true,
+      uri: encodeURI(spec.replaceAll('\\', '/')) as `./${string}` | `../${string}`,
+    };
+  }
+
+  return;
+}
+
+function recognizeAbsoluteUnixImport(spec: string): Import.Absolute {
+  return {
+    kind: 'path',
+    spec,
+    isRelative: false,
+    uri: pathToFileURL(spec).href as `file:///${string}`,
+  };
+}
+
+function recognizeUNCWindowsImport(spec: string): Import.Absolute | undefined {
+  const uncPath = win32.toNamespacedPath(spec);
+  const unixPath = uncPath.replaceAll('\\', '/');
+
+  return {
+    kind: 'path',
+    spec,
+    isRelative: false,
+    uri: unixPathToURI(unixPath),
+  };
+}
+
+function recognizeAbsoluteWindowsImport(spec: string): Import.Absolute | undefined {
+  if (!win32.isAbsolute(spec)) {
+    return;
+  }
+
+  let unixPath = spec.replaceAll('\\', '/');
+
+  if (!unixPath.startsWith('/')) {
+    unixPath = '/' + unixPath;
+  }
+
+  return {
+    kind: 'path',
+    spec,
+    isRelative: false,
+    uri: unixPathToURI(unixPath),
+  };
+}
+
+function unixPathToURI(unixPath: string): `file:///${string}` {
+  return encodeURI(`file://${unixPath}`).replace(
+    /[?#]/g,
+    encodeURIComponent,
+  ) as `file:///${string}`;
 }
 
 const URI_PATTERN = /^(?:([^:/?#]+):)(?:\/\/(?:[^/?#]*))?([^?#]*)(?:\?(?:[^#]*))?(?:#(?:.*))?/;
