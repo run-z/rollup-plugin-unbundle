@@ -314,7 +314,7 @@ function recognizeUNCWindowsImport(spec: string): Import.Absolute | undefined {
     kind: 'path',
     spec,
     isRelative: false,
-    uri: pathToFileURL(unixPath).href as `file:///${string}`,
+    uri: unixPathToURI(unixPath),
   };
 }
 
@@ -333,8 +333,15 @@ function recognizeAbsoluteWindowsImport(spec: string): Import.Absolute | undefin
     kind: 'path',
     spec,
     isRelative: false,
-    uri: pathToFileURL(unixPath).href as `file:///${string}`,
+    uri: unixPathToURI(unixPath),
   };
+}
+
+function unixPathToURI(unixPath: string): `file:///${string}` {
+  return encodeURI(`file://${unixPath}`).replace(
+    /[?#]/g,
+    encodeURIComponent,
+  ) as `file:///${string}`;
 }
 
 const URI_PATTERN = /^(?:([^:/?#]+):)(?:\/\/(?:[^/?#]*))?([^?#]*)(?:\?(?:[^#]*))?(?:#(?:.*))?/;
