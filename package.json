@@ -49,6 +49,7 @@
     "@types/is-glob": "^4.0.2",
     "@types/micromatch": "^4.0.2",
     "@types/node": "^18.11.18",
+    "@types/normalize-path": "^3.0.0",
     "@types/semver": "^7.3.13",
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@typescript-eslint/parser": "^5.48.2",
@@ -83,6 +84,7 @@
     "z": "run-z +cmd:rollup,+cmd:eslint,+cmd:jest +dts,+cmd:eslint,+cmd:jest"
   },
   "dependencies": {
+    "normalize-path": "^3.0.0",
     "semver": "^7.3.8"
   }
 }

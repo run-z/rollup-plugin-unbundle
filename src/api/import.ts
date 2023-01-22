@@ -1,6 +1,7 @@
 import { builtinModules } from 'node:module';
 import win32 from 'node:path/win32';
 import { pathToFileURL } from 'node:url';
+import normalizePath from 'normalize-path';
 
 /**
  * Import statement specifier.
@@ -237,7 +238,7 @@ const IMPORT_SPEC_PARSERS: {
       spec,
     },
   '/': recognizeAbsoluteUnixPathImport,
-  '\\': recognizeUNCWindowsPathImport,
+  '\\': recognizeAbsoluteWindowsPathImport,
   '@': recognizeScopedPackageImport,
   _: spec => ({
     // Unscoped package name can not start with underscore
@@ -306,30 +307,19 @@ function recognizeAbsoluteUnixPathImport(spec: string): Import.Absolute {
   };
 }
 
-function recognizeUNCWindowsPathImport(spec: string): Import.Absolute | undefined {
-  const uncPath = win32.toNamespacedPath(spec);
-  const unixPath = uncPath.replaceAll('\\', '/');
-
-  return {
-    kind: 'path',
-    spec,
-    isRelative: false,
-    uri: pathToFileURL(unixPath).href as `file:///${string}`,
-  };
-}
-
 function recognizeAbsoluteWindowsPathImport(spec: string): Import.Absolute | undefined {
   if (!win32.isAbsolute(spec)) {
     return;
   }
 
-  const unixPath = '/' + spec.replaceAll('\\', '/');
+  const unixPath = normalizePath(spec);
 
   return {
     kind: 'path',
     spec,
     isRelative: false,
-    uri: pathToFileURL(unixPath).href as `file:///${string}`,
+    uri: pathToFileURL(unixPath.startsWith('/') ? unixPath : '/' + unixPath)
+      .href as `file:///${string}`,
   };
 }
 
