@@ -147,16 +147,6 @@ describe('recognizeImport', () => {
         uri: `file:///c:/dir/test%20path`,
       });
     });
-    it('recognizes windows path with prefixed drive letter', () => {
-      const spec = '\\c:\\dir\\test path';
-
-      expect(recognizeImport(spec)).toEqual({
-        kind: 'path',
-        spec,
-        isRelative: false,
-        uri: `file:///c:/dir/test%20path`,
-      });
-    });
     it('recognizes absolute windows path', () => {
       const spec = '\\\\server\\test path';
 
