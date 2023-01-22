@@ -29,7 +29,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">VirtualPackageFS</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L18">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:18</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L16">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:16</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -54,8 +54,7 @@
 <div class="tsd-index-list"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_addPackage" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>#add<wbr/>Package</span></a>
 <a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_removeNamedPackage" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>#remove<wbr/>Named<wbr/>Package</span></a>
 <a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_resolveDep" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>#resolve<wbr/>Dep</span></a>
-<a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_toFilePath" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>#to<wbr/>File<wbr/>Path</span></a>
-<a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_toFileURL" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>#to<wbr/>FileURL</span></a>
+<a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_toHttpURL" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>#to<wbr/>HttpURL</span></a>
 <a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_toPackageURI" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>#to<wbr/>PackageURI</span></a>
 <a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#addPackage" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>add<wbr/>Package</span></a>
 <a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#findPackageDir" class="tsd-index-link tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>find<wbr/>Package<wbr/>Dir</span></a>
@@ -84,24 +83,24 @@
 <h4 class="tsd-returns-title">Returns <a href="rollup_plugin_unbundle_api.VirtualPackageFS.html" class="tsd-signature-type" data-tsd-kind="Class">VirtualPackageFS</a></h4><aside class="tsd-sources">
 <p>Overrides <a href="rollup_plugin_unbundle_api.PackageFS-1.html">PackageFS</a>.<a href="rollup_plugin_unbundle_api.PackageFS-1.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L29">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:29</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L27">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:27</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="_byName" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>#by<wbr/>Name</span><a href="#_byName" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">#by<wbr/>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/rollup_plugin_unbundle_api.PackageFS.PackageDir.html" class="tsd-signature-type" data-tsd-kind="Interface">PackageDir</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L22">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:22</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L20">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:20</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="_byURI" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>#byURI</span><a href="#_byURI" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">#byURI<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/rollup_plugin_unbundle_api.PackageFS.PackageDir.html" class="tsd-signature-type" data-tsd-kind="Interface">PackageDir</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L21">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:21</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L19">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:19</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="_root" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>#root</span><a href="#_root" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">#root<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L20">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:20</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L18">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:18</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
 <section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class"><a id="root" class="tsd-anchor"></a>
@@ -114,7 +113,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Overrides PackageFS.root</p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L34">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:34</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L32">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:32</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="_addPackage" class="tsd-anchor"></a>
@@ -129,7 +128,7 @@
 <h5>packageDir: <a href="../interfaces/rollup_plugin_unbundle_api.PackageFS.PackageDir.html" class="tsd-signature-type" data-tsd-kind="Interface">PackageDir</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L96">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:96</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L94">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:94</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="_removeNamedPackage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>#remove<wbr/>Named<wbr/>Package</span><a href="#_removeNamedPackage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
@@ -142,7 +141,7 @@
 <h5>__namedParameters: <a href="../interfaces/rollup_plugin_unbundle_api.PackageJson-1.html" class="tsd-signature-type" data-tsd-kind="Interface">PackageJson</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L117">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:117</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L115">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:115</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="_resolveDep" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>#resolve<wbr/>Dep</span><a href="#_resolveDep" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
@@ -157,24 +156,11 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> dependencies: <a href="../interfaces/rollup_plugin_unbundle_api.PackageJson.Dependencies.html" class="tsd-signature-type" data-tsd-kind="Interface">Dependencies</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L159">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:159</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="_toFilePath" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>#to<wbr/>File<wbr/>Path</span><a href="#_toFilePath" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L167">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:167</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="_toHttpURL" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>#to<wbr/>HttpURL</span><a href="#_toHttpURL" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
-<li class="tsd-signature tsd-anchor-link" id="_toFilePath._toFilePath-1">#to<wbr/>File<wbr/>Path<span class="tsd-signature-symbol">(</span>uri<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><a href="#_toFilePath._toFilePath-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5>uri: <span class="tsd-signature-type">string</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L189">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:189</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="_toFileURL" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>#to<wbr/>FileURL</span><a href="#_toFileURL" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
-<li class="tsd-signature tsd-anchor-link" id="_toFileURL._toFileURL-1">#to<wbr/>FileURL<span class="tsd-signature-symbol">(</span>uri<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">URL</span><a href="#_toFileURL._toFileURL-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="_toHttpURL._toHttpURL-1">#to<wbr/>HttpURL<span class="tsd-signature-symbol">(</span>uri<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">URL</span><a href="#_toHttpURL._toHttpURL-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -183,7 +169,7 @@
 <h5>uri: <span class="tsd-signature-type">string</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">URL</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L193">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:193</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L201">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:201</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="_toPackageURI" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>#to<wbr/>PackageURI</span><a href="#_toPackageURI" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
@@ -196,7 +182,7 @@
 <h5>uri: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">URL</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L183">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:183</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L191">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:191</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="addPackage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Package</span><a href="#addPackage" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -221,7 +207,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="rollup_plugin_unbundle_api.VirtualPackageFS.html" class="tsd-signature-type" data-tsd-kind="Class">VirtualPackageFS</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L51">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:51</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L49">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:49</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="addPackage.addPackage-2">add<wbr/>Package<span class="tsd-signature-symbol">(</span>uri<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, packageJson<span class="tsd-signature-symbol">: </span><a href="../interfaces/rollup_plugin_unbundle_api.PackageJson-1.html" class="tsd-signature-type" data-tsd-kind="Interface">PackageJson</a>, allowDuplicate<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html" class="tsd-signature-type" data-tsd-kind="Class">VirtualPackageFS</a><a href="#addPackage.addPackage-2" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Registers virtual package at the given URI.</p>
@@ -245,7 +231,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> allowDuplicate: <span class="tsd-signature-type">boolean</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="rollup_plugin_unbundle_api.VirtualPackageFS.html" class="tsd-signature-type" data-tsd-kind="Class">VirtualPackageFS</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L65">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:65</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L63">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:63</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a id="findPackageDir" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>find<wbr/>Package<wbr/>Dir</span><a href="#findPackageDir" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -265,7 +251,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/rollup_plugin_unbundle_api.PackageFS.PackageDir.html" class="tsd-signature-type" data-tsd-kind="Interface">PackageDir</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="rollup_plugin_unbundle_api.PackageFS-1.html">PackageFS</a>.<a href="rollup_plugin_unbundle_api.PackageFS-1.html#findPackageDir">findPackageDir</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/package-fs.ts#L82">run-z/rollup-plugin-unbundle/src/api/package-fs.ts:82</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/package-fs.ts#L82">run-z/rollup-plugin-unbundle/src/api/package-fs.ts:82</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="loadPackageJson" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>load<wbr/>Package<wbr/>Json</span><a href="#loadPackageJson" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -286,7 +272,7 @@ file.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/rollup_plugin_unbundle_api.PackageJson-1.html" class="tsd-signature-type" data-tsd-kind="Interface">PackageJson</a></h4><aside class="tsd-sources">
 <p>Overrides <a href="rollup_plugin_unbundle_api.PackageFS-1.html">PackageFS</a>.<a href="rollup_plugin_unbundle_api.PackageFS-1.html#loadPackageJson">loadPackageJson</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L133">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:133</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L131">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:131</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="parentDir" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>parent<wbr/>Dir</span><a href="#parentDir" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -306,7 +292,7 @@ file.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="rollup_plugin_unbundle_api.PackageFS-1.html">PackageFS</a>.<a href="rollup_plugin_unbundle_api.PackageFS-1.html#parentDir">parentDir</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L137">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:137</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L135">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:135</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="recognizePackageURI" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>recognize<wbr/>PackageURI</span><a href="#recognizePackageURI" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -326,7 +312,7 @@ file.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="rollup_plugin_unbundle_api.PackageFS-1.html">PackageFS</a>.<a href="rollup_plugin_unbundle_api.PackageFS-1.html#recognizePackageURI">recognizePackageURI</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L129">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:129</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L127">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:127</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="resolveName" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>resolve<wbr/>Name</span><a href="#resolveName" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -352,7 +338,7 @@ to find one.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="rollup_plugin_unbundle_api.PackageFS-1.html">PackageFS</a>.<a href="rollup_plugin_unbundle_api.PackageFS-1.html#resolveName">resolveName</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L148">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:148</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L156">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:156</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="resolvePath" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>resolve<wbr/>Path</span><a href="#resolvePath" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -377,7 +363,7 @@ to find one.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">URL</span></h4><aside class="tsd-sources">
 <p>Overrides <a href="rollup_plugin_unbundle_api.PackageFS-1.html">PackageFS</a>.<a href="rollup_plugin_unbundle_api.PackageFS-1.html#resolvePath">resolvePath</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/ba9a2f8/src/api/virtual-package-fs.ts#L144">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:144</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/run-z/rollup-plugin-unbundle/blob/8c4b4c8/src/api/virtual-package-fs.ts#L152">run-z/rollup-plugin-unbundle/src/api/virtual-package-fs.ts:152</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -419,8 +405,7 @@ to find one.</p>
 <li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_addPackage" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>#add<wbr/>Package</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_removeNamedPackage" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>#remove<wbr/>Named<wbr/>Package</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_resolveDep" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>#resolve<wbr/>Dep</a></li>
-<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_toFilePath" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>#to<wbr/>File<wbr/>Path</a></li>
-<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_toFileURL" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>#to<wbr/>FileURL</a></li>
+<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_toHttpURL" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>#to<wbr/>HttpURL</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#_toPackageURI" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>#to<wbr/>PackageURI</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#addPackage" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>add<wbr/>Package</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="rollup_plugin_unbundle_api.VirtualPackageFS.html#findPackageDir" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>find<wbr/>Package<wbr/>Dir</a></li>
