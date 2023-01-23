@@ -314,7 +314,7 @@ function recognizeAbsoluteUnixImport(spec: string): Import.Absolute {
 
 function recognizeUNCWindowsImport(spec: string): Import.Absolute | undefined {
   if (WINDOWS_DRIVE_PATH_PATTERN.test(spec)) {
-    return recognizeAbsoluteWindowsImport(spec);
+    return createAbsoluteWindowsImport(spec);
   }
 
   return {
@@ -330,6 +330,10 @@ function recognizeAbsoluteWindowsImport(spec: string): Import.Absolute | undefin
     return;
   }
 
+  return createAbsoluteWindowsImport(spec);
+}
+
+function createAbsoluteWindowsImport(spec: string): Import.Absolute | undefined {
   return {
     kind: 'path',
     spec,
@@ -338,7 +342,7 @@ function recognizeAbsoluteWindowsImport(spec: string): Import.Absolute | undefin
   };
 }
 
-const WINDOWS_DRIVE_PATH_PATTERN = /^\\?[^a-z0-9]+:\\/i;
+const WINDOWS_DRIVE_PATH_PATTERN = /^\\?[a-z0-9]+:\\/i;
 
 function relativeURIPath(path: string): `./${string}` | `../${string}` {
   const pathStart = path.indexOf('/');
