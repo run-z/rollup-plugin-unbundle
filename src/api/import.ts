@@ -324,14 +324,16 @@ function recognizeRelativeImport(spec: string): Import.Relative | undefined {
 
 function recognizeAbsoluteUnixImport(spec: string): Import.Absolute {
   const url = new URL(spec, FS_ROOT);
-  const uri = (url.pathname + url.search + url.hash) as `/${string}`;
+  const path: `/${string}` = `/${
+    url.pathname.slice(FS_ROOT.pathname.length) + url.search + url.hash
+  }`;
 
   return {
     kind: 'path',
     spec,
     isRelative: false,
-    path: `/${uri.slice(FS_ROOT.pathname.length)}`,
-    uri,
+    path,
+    uri: path,
   };
 }
 
@@ -363,7 +365,7 @@ function createAbsoluteWindowsImport(spec: string): Import.Absolute | undefined 
     spec,
     isRelative: false,
     path,
-    uri: `${FS_ROOT.href}${path.slice(1)}`,
+    uri: `file://${path}`,
   };
 }
 

@@ -1,6 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
 import { win32 } from 'node:path/win32';
-import { pathToFileURL } from 'node:url';
 import { Import, recognizeImport } from './import.js';
 
 describe('recognizeImport', () => {
@@ -137,7 +136,7 @@ describe('recognizeImport', () => {
         spec,
         isRelative: false,
         path: '/test%20path',
-        uri: pathToFileURL(spec).pathname,
+        uri: '/test%20path',
       });
     });
     it('recognizes windows path with drive letter', () => {
