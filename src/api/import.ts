@@ -1,6 +1,6 @@
 import { builtinModules } from 'node:module';
 import win32 from 'node:path/win32';
-import { pathToFileURL } from 'node:url';
+import { FS_ROOT } from '../impl/fs-root.js';
 
 /**
  * Import statement specifier.
@@ -121,9 +121,11 @@ export namespace Import {
     readonly isRelative: false;
 
     /**
-     * Absolute import URI.
+     * Absolute URI path to imported module.
+     *
+     *  URI-encoded. Always starts with `/`. Uses `/` path separator.
      */
-    readonly uri: `file:///${string}`;
+    readonly path: `/${string}`;
   }
 
   /**
@@ -143,9 +145,11 @@ export namespace Import {
     readonly isRelative: true;
 
     /**
-     * Relative import URI.
+     * Relative URI path to imported module.
+     *
+     * URI-encoded. Always starts with `.`. Uses `/` path separator.
      */
-    readonly uri: '.' | '..' | `./${string}` | `../${string}`;
+    readonly path: '.' | '..' | `./${string}` | `../${string}`;
   }
 
   /**
@@ -270,7 +274,7 @@ function recognizeRelativeImport(spec: string): Import.Relative | undefined {
       kind: 'path',
       spec,
       isRelative: true,
-      uri: spec,
+      path: spec,
     };
   }
 
@@ -280,7 +284,7 @@ function recognizeRelativeImport(spec: string): Import.Relative | undefined {
       kind: 'path',
       spec,
       isRelative: true,
-      uri: encodeURI(spec) as `./${string}` | `../${string}`,
+      path: relativeURIPath(spec),
     };
   }
 
@@ -290,7 +294,7 @@ function recognizeRelativeImport(spec: string): Import.Relative | undefined {
       kind: 'path',
       spec,
       isRelative: true,
-      uri: encodeURI(spec.replaceAll('\\', '/')) as `./${string}` | `../${string}`,
+      path: windowsURIPath(spec) as `./${string}` | `../${string}`,
     };
   }
 
@@ -298,23 +302,26 @@ function recognizeRelativeImport(spec: string): Import.Relative | undefined {
 }
 
 function recognizeAbsoluteUnixImport(spec: string): Import.Absolute {
+  const url = new URL(spec, FS_ROOT);
+
   return {
     kind: 'path',
     spec,
     isRelative: false,
-    uri: pathToFileURL(spec).href as `file:///${string}`,
+    path: (url.pathname + url.search + url.hash) as `/${string}`,
   };
 }
 
 function recognizeUNCWindowsImport(spec: string): Import.Absolute | undefined {
-  const uncPath = win32.toNamespacedPath(spec);
-  const unixPath = uncPath.replaceAll('\\', '/');
+  if (WINDOWS_DRIVE_PATH_PATTERN.test(spec)) {
+    return recognizeAbsoluteWindowsImport(spec);
+  }
 
   return {
     kind: 'path',
     spec,
     isRelative: false,
-    uri: unixPathToURI(unixPath),
+    path: windowsURIPath(win32.toNamespacedPath(spec)) as `/${string}`,
   };
 }
 
@@ -323,25 +330,29 @@ function recognizeAbsoluteWindowsImport(spec: string): Import.Absolute | undefin
     return;
   }
 
-  let unixPath = spec.replaceAll('\\', '/');
-
-  if (!unixPath.startsWith('/')) {
-    unixPath = '/' + unixPath;
-  }
-
   return {
     kind: 'path',
     spec,
     isRelative: false,
-    uri: unixPathToURI(unixPath),
+    path: windowsURIPath(spec.startsWith('\\') ? spec : '\\' + spec) as `/${string}`,
   };
 }
 
-function unixPathToURI(unixPath: string): `file:///${string}` {
-  return encodeURI(`file://${unixPath}`).replace(
-    /[?#]/g,
-    encodeURIComponent,
-  ) as `file:///${string}`;
+const WINDOWS_DRIVE_PATH_PATTERN = /^\\?[^\\:]+:\\/i;
+
+function relativeURIPath(path: string): `./${string}` | `../${string}` {
+  const pathStart = path.indexOf('/');
+  const url = new URL('.' + path.slice(pathStart), FS_ROOT);
+
+  return (path.slice(0, pathStart) + url.pathname + url.search + url.hash) as
+    | `./${string}`
+    | `../${string}`;
+}
+
+function windowsURIPath(path: string): string {
+  const unixPath = path.replaceAll('\\', '/');
+
+  return encodeURI(`${unixPath}`).replace(/[?#]/g, encodeURIComponent) as `/${string}`;
 }
 
 const URI_PATTERN = /^(?:([^:/?#]+):)(?:\/\/(?:[^/?#]*))?([^?#]*)(?:\?(?:[^#]*))?(?:#(?:.*))?/;

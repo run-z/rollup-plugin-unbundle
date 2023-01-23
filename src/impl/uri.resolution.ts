@@ -18,15 +18,16 @@ export class URI$Resolution extends Import$Resolution<Import.URI> {
 
     switch (spec.kind) {
       case 'uri':
+        return this.#resolveURIImport(spec.spec);
       case 'path':
-        return this.#resolveURIImport(spec);
+        return this.#resolveURIImport(spec.path);
       default:
         return this.#resolver.resolve(spec);
     }
   }
 
-  #resolveURIImport(spec: Import.URI | Import.Path): ImportResolution {
-    return this.#resolver.resolveURI(uriToImport(new URL(spec.spec, this.uri)));
+  #resolveURIImport(path: string): ImportResolution {
+    return this.#resolver.resolveURI(uriToImport(new URL(path, this.uri)));
   }
 
 }

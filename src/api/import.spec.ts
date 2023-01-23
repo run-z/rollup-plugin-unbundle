@@ -116,7 +116,7 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec: '.',
         isRelative: true,
-        uri: '.',
+        path: '.',
       });
     });
     it('recognizes parent directory path', () => {
@@ -124,7 +124,7 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec: '..',
         isRelative: true,
-        uri: '..',
+        path: '..',
       });
     });
     it('recognizes absolute unix path', () => {
@@ -134,7 +134,7 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec,
         isRelative: false,
-        uri: pathToFileURL(spec).href,
+        path: pathToFileURL(spec).pathname,
       });
     });
     it('recognizes windows path with drive letter', () => {
@@ -144,7 +144,17 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec,
         isRelative: false,
-        uri: `file:///c:/dir/test%20path`,
+        path: `/c:/dir/test%20path`,
+      });
+    });
+    it('recognizes absolute windows path with drive letter', () => {
+      const spec = '\\c:\\dir\\test path';
+
+      expect(recognizeImport(spec)).toEqual({
+        kind: 'path',
+        spec,
+        isRelative: false,
+        path: `/c:/dir/test%20path`,
       });
     });
     it('recognizes absolute windows path', () => {
@@ -154,7 +164,7 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec,
         isRelative: false,
-        uri: `file:////%3F/UNC/server/test%20path/`,
+        path: `//%3F/UNC/server/test%20path/`,
       });
     });
     it('recognizes UNC windows path', () => {
@@ -164,17 +174,17 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec,
         isRelative: false,
-        uri: `file:////%3F/UNC/server/test%20path/`,
+        path: `//%3F/UNC/server/test%20path/`,
       });
     });
     it('recognizes relative unix path', () => {
-      const spec = './test path';
+      const spec = './test path?q=a';
 
       expect(recognizeImport(spec)).toEqual({
         kind: 'path',
         spec,
         isRelative: true,
-        uri: './test%20path',
+        path: './test%20path?q=a',
       });
     });
     it('recognizes relative windows path', () => {
@@ -184,17 +194,17 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec,
         isRelative: true,
-        uri: './test%20path',
+        path: './test%20path',
       });
     });
     it('recognizes unix path relative to parent directory', () => {
-      const spec = '../test path';
+      const spec = '../test path#q=a';
 
       expect(recognizeImport(spec)).toEqual({
         kind: 'path',
         spec,
         isRelative: true,
-        uri: '../test%20path',
+        path: '../test%20path#q=a',
       });
     });
     it('recognizes windows path relative to parent directory', () => {
@@ -204,7 +214,7 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec,
         isRelative: true,
-        uri: '../test%20path',
+        path: '../test%20path',
       });
     });
   });

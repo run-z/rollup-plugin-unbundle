@@ -24,7 +24,7 @@ export abstract class Module$Resolution<TImport extends Import> extends Import$R
       case 'uri':
         return this.#resolveURI(spec);
       case 'path':
-        return this.#resolvePath(spec.uri);
+        return this.#resolvePath(spec.path);
       case 'package':
         return this.#resolveName(spec.name) ?? this.#resolver.resolve(spec);
       default:

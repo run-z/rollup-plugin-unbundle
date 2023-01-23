@@ -57,8 +57,9 @@ export class ImportResolver {
     switch (spec.kind) {
       case 'implied':
       case 'package':
-      case 'path':
         return new Unknown$Resolution(this, `import:${spec.kind}:${spec.spec}`, spec);
+      case 'path':
+        return new Unknown$Resolution(this, `import:${spec.kind}:${spec.path}`, spec);
       case 'subpath':
         return new Unknown$Resolution(this, `import:${spec.kind}:${spec.spec.slice(1)}`, spec);
       case 'synthetic':
