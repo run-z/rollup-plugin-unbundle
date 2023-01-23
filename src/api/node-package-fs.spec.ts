@@ -22,7 +22,7 @@ describe('NodePackageFS', () => {
 
   describe('parentDir', () => {
     it('returns undefined for root dir', () => {
-      expect(fs.parentDir(FS_ROOT)).toBeUndefined();
+      expect(fs.parentDir(FS_ROOT.href)).toBeUndefined();
     });
   });
 

@@ -338,15 +338,16 @@ function recognizeAbsoluteWindowsImport(spec: string): Import.Absolute | undefin
   };
 }
 
-const WINDOWS_DRIVE_PATH_PATTERN = /^\\?[^\\:]+:\\/i;
+const WINDOWS_DRIVE_PATH_PATTERN = /^\\?[^a-z0-9]+:\\/i;
 
 function relativeURIPath(path: string): `./${string}` | `../${string}` {
   const pathStart = path.indexOf('/');
-  const url = new URL('.' + path.slice(pathStart), FS_ROOT);
+  const url = new URL(path.slice(pathStart), FS_ROOT);
 
-  return (path.slice(0, pathStart) + url.pathname + url.search + url.hash) as
-    | `./${string}`
-    | `../${string}`;
+  return (path.slice(0, pathStart + 1)
+    + url.pathname.slice(FS_ROOT.pathname.length)
+    + url.search
+    + url.hash) as `./${string}` | `../${string}`;
 }
 
 function windowsURIPath(path: string): string {
