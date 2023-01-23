@@ -126,6 +126,13 @@ export namespace Import {
      *  URI-encoded. Always starts with `/`. Uses `/` path separator.
      */
     readonly path: `/${string}`;
+
+    /**
+     * Absolute URI to imported module.
+     *
+     * May contain `file:///` scheme e.g. for Windows paths. Otherwise, the same as {@link path}.
+     */
+    readonly uri: string;
   }
 
   /**
@@ -150,6 +157,13 @@ export namespace Import {
      * URI-encoded. Always starts with `.`. Uses `/` path separator.
      */
     readonly path: '.' | '..' | `./${string}` | `../${string}`;
+
+    /**
+     * Relative URI of imported module.
+     *
+     * The same as {@link path}.
+     */
+    readonly uri: '.' | '..' | `./${string}` | `../${string}`;
   }
 
   /**
@@ -275,26 +289,33 @@ function recognizeRelativeImport(spec: string): Import.Relative | undefined {
       spec,
       isRelative: true,
       path: spec,
+      uri: spec,
     };
   }
 
   if (spec.startsWith('./') || spec.startsWith('../')) {
     // Unix path.
+    const path = relativeURIPath(spec);
+
     return {
       kind: 'path',
       spec,
       isRelative: true,
-      path: relativeURIPath(spec),
+      path,
+      uri: path,
     };
   }
 
   if (spec.startsWith('.\\') || spec.startsWith('..\\')) {
     // Windows path.
+    const path = windowsURIPath(spec) as `./${string}` | `../${string}`;
+
     return {
       kind: 'path',
       spec,
       isRelative: true,
-      path: windowsURIPath(spec) as `./${string}` | `../${string}`,
+      path,
+      uri: path,
     };
   }
 
@@ -303,12 +324,14 @@ function recognizeRelativeImport(spec: string): Import.Relative | undefined {
 
 function recognizeAbsoluteUnixImport(spec: string): Import.Absolute {
   const url = new URL(spec, FS_ROOT);
+  const uri = (url.pathname + url.search + url.hash) as `/${string}`;
 
   return {
     kind: 'path',
     spec,
     isRelative: false,
-    path: (url.pathname + url.search + url.hash) as `/${string}`,
+    path: `/${uri.slice(FS_ROOT.pathname.length)}`,
+    uri,
   };
 }
 
@@ -317,28 +340,30 @@ function recognizeUNCWindowsImport(spec: string): Import.Absolute | undefined {
     return createAbsoluteWindowsImport(spec);
   }
 
+  const path = windowsURIPath(win32.toNamespacedPath(spec)) as `/${string}`;
+
   return {
     kind: 'path',
     spec,
     isRelative: false,
-    path: windowsURIPath(win32.toNamespacedPath(spec)) as `/${string}`,
+    path,
+    uri: `file://${path}`,
   };
 }
 
 function recognizeAbsoluteWindowsImport(spec: string): Import.Absolute | undefined {
-  if (!win32.isAbsolute(spec)) {
-    return;
-  }
-
-  return createAbsoluteWindowsImport(spec);
+  return win32.isAbsolute(spec) ? createAbsoluteWindowsImport(spec) : undefined;
 }
 
 function createAbsoluteWindowsImport(spec: string): Import.Absolute | undefined {
+  const path = windowsURIPath(spec.startsWith('\\') ? spec : '\\' + spec) as `/${string}`;
+
   return {
     kind: 'path',
     spec,
     isRelative: false,
-    path: windowsURIPath(spec.startsWith('\\') ? spec : '\\' + spec) as `/${string}`,
+    path,
+    uri: `${FS_ROOT.href}${path.slice(1)}`,
   };
 }
 

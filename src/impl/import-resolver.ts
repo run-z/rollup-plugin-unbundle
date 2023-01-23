@@ -59,7 +59,7 @@ export class ImportResolver {
       case 'package':
         return new Unknown$Resolution(this, `import:${spec.kind}:${spec.spec}`, spec);
       case 'path':
-        return new Unknown$Resolution(this, `import:${spec.kind}:${spec.path}`, spec);
+        return new Unknown$Resolution(this, `import:${spec.kind}:${spec.uri}`, spec);
       case 'subpath':
         return new Unknown$Resolution(this, `import:${spec.kind}:${spec.spec.slice(1)}`, spec);
       case 'synthetic':

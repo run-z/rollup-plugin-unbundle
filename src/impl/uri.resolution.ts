@@ -20,7 +20,7 @@ export class URI$Resolution extends Import$Resolution<Import.URI> {
       case 'uri':
         return this.#resolveURIImport(spec.spec);
       case 'path':
-        return this.#resolveURIImport(spec.path);
+        return this.#resolveURIImport(spec.uri);
       default:
         return this.#resolver.resolve(spec);
     }

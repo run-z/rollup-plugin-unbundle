@@ -117,6 +117,7 @@ describe('recognizeImport', () => {
         spec: '.',
         isRelative: true,
         path: '.',
+        uri: '.',
       });
     });
     it('recognizes parent directory path', () => {
@@ -125,6 +126,7 @@ describe('recognizeImport', () => {
         spec: '..',
         isRelative: true,
         path: '..',
+        uri: '..',
       });
     });
     it('recognizes absolute unix path', () => {
@@ -134,7 +136,8 @@ describe('recognizeImport', () => {
         kind: 'path',
         spec,
         isRelative: false,
-        path: pathToFileURL(spec).pathname,
+        path: '/test%20path',
+        uri: pathToFileURL(spec).pathname,
       });
     });
     it('recognizes windows path with drive letter', () => {
@@ -145,6 +148,7 @@ describe('recognizeImport', () => {
         spec,
         isRelative: false,
         path: `/c:/dir/test%20path`,
+        uri: `file:///c:/dir/test%20path`,
       });
     });
     it('recognizes absolute windows path with drive letter', () => {
@@ -155,6 +159,7 @@ describe('recognizeImport', () => {
         spec,
         isRelative: false,
         path: `/c:/dir/test%20path`,
+        uri: `file:///c:/dir/test%20path`,
       });
     });
     it('recognizes absolute windows path', () => {
@@ -165,6 +170,7 @@ describe('recognizeImport', () => {
         spec,
         isRelative: false,
         path: `//%3F/UNC/server/test%20path/`,
+        uri: `file:////%3F/UNC/server/test%20path/`,
       });
     });
     it('recognizes UNC windows path', () => {
@@ -175,6 +181,7 @@ describe('recognizeImport', () => {
         spec,
         isRelative: false,
         path: `//%3F/UNC/server/test%20path/`,
+        uri: `file:////%3F/UNC/server/test%20path/`,
       });
     });
     it('recognizes relative unix path', () => {
@@ -185,6 +192,7 @@ describe('recognizeImport', () => {
         spec,
         isRelative: true,
         path: './test%20path?q=a',
+        uri: './test%20path?q=a',
       });
     });
     it('recognizes relative windows path', () => {
@@ -195,6 +203,7 @@ describe('recognizeImport', () => {
         spec,
         isRelative: true,
         path: './test%20path',
+        uri: './test%20path',
       });
     });
     it('recognizes unix path relative to parent directory', () => {
@@ -205,6 +214,7 @@ describe('recognizeImport', () => {
         spec,
         isRelative: true,
         path: '../test%20path#q=a',
+        uri: '../test%20path#q=a',
       });
     });
     it('recognizes windows path relative to parent directory', () => {
@@ -215,6 +225,7 @@ describe('recognizeImport', () => {
         spec,
         isRelative: true,
         path: '../test%20path',
+        uri: '../test%20path',
       });
     });
   });
