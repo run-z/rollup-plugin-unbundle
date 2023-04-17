@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  ignorePatterns: ['node_modules/', 'dist/', 'target/', '__snapshots__', '*.d.ts'],
+  ignorePatterns: ['node_modules/', 'dist/', 'target/'],
   extends: ['@run-z'],
   overrides: [
     {
