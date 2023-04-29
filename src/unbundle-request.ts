@@ -1,5 +1,5 @@
+import { ImportResolution } from '@run-z/npk';
 import { NullValue } from 'rollup';
-import { ImportResolution } from './api/import-resolution.js';
 
 /**
  * A request for check whether the module should be bundled or not.

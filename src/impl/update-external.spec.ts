@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
+import { NodePackageFS, PackageFS, resolveRootPackage } from '@run-z/npk';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { IsRollupExternalImport } from '../api/is-rollup-external-import.js';
-import { NodePackageFS } from '../api/node-package-fs.js';
-import { PackageFS } from '../api/package-fs.js';
-import { resolveRootPackage } from '../api/package-resolution.js';
+import { IsRollupExternalImport } from './is-rollup-external-import.js';
 import { updateExternal } from './update-external.js';
 
 describe('updateExternal', () => {
@@ -72,7 +70,7 @@ describe('updateExternal', () => {
       resolutionRoot: resolveRootPackage(findRollupDir()),
       isExternal(request) {
         return request.isResolved
-          ? request.resolveModule().asPackage()?.name === 'acorn'
+          ? request.resolveModule().asPackage()?.packageInfo.name === 'acorn'
           : request.isExternal();
       },
     });
