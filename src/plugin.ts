@@ -1,12 +1,14 @@
 /**
  * @module rollup-plugin-unbundle
  */
-export * from './unbundle-options.js';
-export * from './unbundle-request.js';
-import { InputOptions, MinimalPluginContext } from 'rollup';
-import { IsRollupExternalImport } from './impl/is-rollup-external-import.js';
+export type * from './is-rollup-external-import.js';
+export type * from './unbundle-options.js';
+export type * from './unbundle-request.js';
+import type { InputOptions, MinimalPluginContext } from 'rollup';
+import { mergeRollupExternal } from './impl/merge-rollup-external.js';
 import { updateExternal } from './impl/update-external.js';
-import { UnbundleOptions } from './unbundle-options.js';
+import type { IsRollupExternalImport } from './is-rollup-external-import.js';
+import type { UnbundleOptions } from './unbundle-options.js';
 
 /**
  * Creates unbundle Rollup plugin.
@@ -21,7 +23,7 @@ export default function unbundle(options?: UnbundleOptions): UnbundlePlugin {
     options(this: MinimalPluginContext, rollupOptions: InputOptions) {
       return {
         ...rollupOptions,
-        external: updateExternal(IsRollupExternalImport(rollupOptions.external), options),
+        external: updateExternal(mergeRollupExternal(rollupOptions.external), options),
       };
     },
   };

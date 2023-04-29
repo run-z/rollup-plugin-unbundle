@@ -1,11 +1,5 @@
 import { ExternalOption } from 'rollup';
-
-/**
- * Rollup `external` option specified as function.
- *
- * This function checks whether the given module import is external or not.
- */
-export type IsRollupExternalImport = Extract<ExternalOption, (...args: any[]) => any>;
+import { IsRollupExternalImport } from '../is-rollup-external-import.js';
 
 /**
  * Convert arbitrary `external` Rollup option to function.
@@ -14,9 +8,7 @@ export type IsRollupExternalImport = Extract<ExternalOption, (...args: any[]) =>
  *
  * @returns `external` option specified as function.
  */
-export function IsRollupExternalImport(
-  external: ExternalOption | undefined,
-): IsRollupExternalImport {
+export function mergeRollupExternal(external: ExternalOption | undefined): IsRollupExternalImport {
   if (external == null) {
     // Unspecified.
     return notExternal;

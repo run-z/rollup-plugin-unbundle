@@ -1,7 +1,7 @@
 import { resolveRootPackage } from '@run-z/npk';
 import { NullValue } from 'rollup';
+import { IsRollupExternalImport } from '../is-rollup-external-import.js';
 import { UnbundleOptions } from '../unbundle-options.js';
-import { IsRollupExternalImport } from './is-rollup-external-import.js';
 import { Unbundle$Request } from './unbundle.request.js';
 
 export function updateExternal(

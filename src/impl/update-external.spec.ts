@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from '@jest/globals';
 import { NodePackageFS, PackageFS, resolveRootPackage } from '@run-z/npk';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { IsRollupExternalImport } from './is-rollup-external-import.js';
+import { IsRollupExternalImport } from '../is-rollup-external-import.js';
 import { updateExternal } from './update-external.js';
 
 describe('updateExternal', () => {
