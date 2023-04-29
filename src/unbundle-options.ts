@@ -1,5 +1,5 @@
+import { ImportResolution } from '@run-z/npk';
 import { NullValue } from 'rollup';
-import { ImportResolution } from './api/import-resolution.js';
 import { UnbundleRequest } from './unbundle-request.js';
 
 /**
@@ -9,11 +9,9 @@ export interface UnbundleOptions {
   /**
    * Imports resolution root.
    *
-   * Either a path to the root package, or an {@link rollup-plugin-unbundle/api!ImportResolution ImportResolution}
-   * class instance.
+   * Either a path to the root package, or an `ImportResolution` class instance.
    *
-   * By default, new resolution root will be created for {@link rollup-plugin-unbundle/api!resolveRootPackage
-   * current package}.
+   * By default, new resolution root will be created for current package.
    */
   readonly resolutionRoot?: string | ImportResolution | undefined;
 
@@ -21,8 +19,7 @@ export interface UnbundleOptions {
    * Decides whether to bundle the module or not.
    *
    * The decision on bundling or externalizing each module will be made based on how the
-   * {@link UnbundleRequest#resolutionRoot root module}
-   * {@link rollup-plugin-unbundle/api!ImportResolution#resolveDependency depends} on
+   * {@link UnbundleRequest#resolutionRoot root module} depends on
    * {@link UnbundleRequest#resolveModule target} one:
    *
    * - Implied, runtime and peer dependencies will be externalized.

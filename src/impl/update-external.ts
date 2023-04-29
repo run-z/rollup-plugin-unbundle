@@ -1,7 +1,7 @@
+import { resolveRootPackage } from '@run-z/npk';
 import { NullValue } from 'rollup';
-import { IsRollupExternalImport } from '../api/is-rollup-external-import.js';
-import { resolveRootPackage } from '../api/package-resolution.js';
 import { UnbundleOptions } from '../unbundle-options.js';
+import { IsRollupExternalImport } from './is-rollup-external-import.js';
 import { Unbundle$Request } from './unbundle.request.js';
 
 export function updateExternal(
@@ -23,9 +23,9 @@ export function updateExternal(
     if (!isResolved) {
       const packageResolution = request.resolveModule().asPackage();
 
-      if (packageResolution && moduleId !== packageResolution.name) {
+      if (packageResolution && moduleId !== packageResolution.packageInfo.name) {
         // Try second time with package name.
-        const packageIsExternal = isExternal(packageResolution.name, importerId, false);
+        const packageIsExternal = isExternal(packageResolution.packageInfo.name, importerId, false);
 
         if (packageIsExternal != null) {
           return packageIsExternal;

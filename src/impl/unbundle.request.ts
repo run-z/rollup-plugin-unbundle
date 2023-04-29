@@ -1,5 +1,5 @@
+import { ImportResolution } from '@run-z/npk';
 import { NullValue } from 'rollup';
-import { ImportResolution } from '../api/import-resolution.js';
 import { UnbundleRequest } from '../unbundle-request.js';
 
 export class Unbundle$Request implements UnbundleRequest {

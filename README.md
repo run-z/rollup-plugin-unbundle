@@ -80,7 +80,9 @@ export default {
 The plugin utilizes import resolution API to make decisions. Some of its behavior can be customized with appropriate
 options.
 
-> See the [API documentation] for the details.
+> See [Node.js package kit] documentation for the details.
+
+[Node.js package kit]: https://www.npmjs.com/package/@run-z/npk
 
 ### `resolutionRoot`
 

@@ -1,6 +1,5 @@
 import ts from '@rollup/plugin-typescript';
 import { builtinModules, createRequire } from 'node:module';
-import path from 'node:path';
 import { defineConfig } from 'rollup';
 import flatDts from 'rollup-plugin-flat-dts';
 import typescript from 'typescript';
@@ -15,7 +14,6 @@ const externals = new Set([
 
 export default defineConfig({
   input: {
-    'unbundle.api': './src/api/mod.ts',
     'unbundle.plugin': './src/plugin.ts',
   },
   plugins: [
@@ -34,8 +32,6 @@ export default defineConfig({
       dir: '.',
       exports: 'auto',
       entryFileNames: 'dist/[name].cjs',
-      chunkFileNames: 'dist/_[name].cjs',
-      manualChunks,
       hoistTransitiveImports: false,
     },
     {
@@ -43,8 +39,6 @@ export default defineConfig({
       sourcemap: true,
       dir: '.',
       entryFileNames: 'dist/[name].js',
-      chunkFileNames: 'dist/_[name].js',
-      manualChunks,
       hoistTransitiveImports: false,
       plugins: [
         flatDts({
@@ -64,11 +58,3 @@ export default defineConfig({
     },
   ],
 });
-
-function manualChunks(id) {
-  if (id === path.resolve('src', 'plugin.ts')) {
-    return 'unbundle.plugin';
-  }
-
-  return 'unbundle.api';
-}

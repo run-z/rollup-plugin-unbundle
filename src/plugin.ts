@@ -4,7 +4,7 @@
 export * from './unbundle-options.js';
 export * from './unbundle-request.js';
 import { InputOptions, MinimalPluginContext } from 'rollup';
-import { IsRollupExternalImport } from './api/is-rollup-external-import.js';
+import { IsRollupExternalImport } from './impl/is-rollup-external-import.js';
 import { updateExternal } from './impl/update-external.js';
 import { UnbundleOptions } from './unbundle-options.js';
 
