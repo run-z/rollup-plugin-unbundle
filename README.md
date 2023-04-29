@@ -2,6 +2,8 @@
 
 [![NPM][npm-image]][npm-url]
 [![Build Status][build-status-img]][build-status-link]
+[![Build@Windows][build-windows-img]][build-windows-link]
+[![Build@MacOS][build-macos-img]][build-macos-link]
 [![Code Quality][quality-img]][quality-link]
 [![Coverage][coverage-img]][coverage-link]
 [![GitHub Project][github-image]][github-url]
@@ -32,7 +34,11 @@ package name. It is not so simple to decide whether the module should be externa
 [npm-image]: https://img.shields.io/npm/v/rollup-plugin-unbundle.svg?logo=npm
 [npm-url]: https://www.npmjs.com/package/rollup-plugin-unbundle
 [build-status-img]: https://github.com/run-z/rollup-plugin-unbundle/workflows/Build/badge.svg
+[build-windows-img]: https://github.com/run-z/rollup-plugin-unbundle/workflows/Build@Windows/badge.svg
+[build-macos-img]: https://github.com/run-z/rollup-plugin-unbundle/workflows/Build@MacOS/badge.svg
 [build-status-link]: https://github.com/run-z/rollup-plugin-unbundle/actions?query=workflow:Build
+[build-windows-link]: https://github.com/run-z/rollup-plugin-unbundle/actions?query=workflow:Build@Windows
+[build-macos-link]: https://github.com/run-z/rollup-plugin-unbundle/actions?query=workflow:Build@MacOS
 [quality-img]: https://app.codacy.com/project/badge/Grade/2de1f7d57474445084344aa20b00ebc2
 [quality-link]: https://www.codacy.com/gh/run-z/rollup-plugin-unbundle/dashboard?utm_source=github.com&utm_medium=referral&utm_content=run-z/rollup-plugin-unbundle&utm_campaign=Badge_Grade
 [coverage-img]: https://app.codacy.com/project/badge/Coverage/2de1f7d57474445084344aa20b00ebc2
@@ -82,7 +88,7 @@ options.
 
 > See [Node.js package kit] documentation for the details.
 
-[Node.js package kit]: https://www.npmjs.com/package/@run-z/npk
+[Node.js package kit]: https://www.npmjs.com/package/@run-z/rollup-plugin-unbundle
 
 ### `resolutionRoot`
 
