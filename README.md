@@ -29,7 +29,7 @@ package name. It is not so simple to decide whether the module should be externa
 
 - Respects [external] option from Rollup configuration.
 
-- Bundles the rest of the dependencies.
+- Bundles the rest of the imported modules.
 
 [npm-image]: https://img.shields.io/npm/v/rollup-plugin-unbundle.svg?logo=npm
 [npm-url]: https://www.npmjs.com/package/rollup-plugin-unbundle

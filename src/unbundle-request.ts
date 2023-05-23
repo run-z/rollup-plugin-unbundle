@@ -1,5 +1,4 @@
-import { ImportResolution } from '@run-z/npk';
-import { NullValue } from 'rollup';
+import type { ImportResolution } from '@run-z/npk';
 
 /**
  * A request for check whether the module should be bundled or not.
@@ -34,6 +33,15 @@ export interface UnbundleRequest {
   get importerId(): string | undefined;
 
   /**
+   * Preceding resolution request.
+   *
+   * Resolutions may be chained. E.g. when `node-resolve` module resolves the module, it tries to continue resolution
+   * of just resolved identifier. In this case this property would contain previous request with module identifier
+   * reflecting preceding attempt.
+   */
+  get prevRequest(): UnbundleRequest | undefined;
+
+  /**
    * Resolves the module doing the import.
    *
    * @returns Either resolved {@link importerId importer module}, or {@link resolutionRoot resolution root}
@@ -53,7 +61,7 @@ export interface UnbundleRequest {
    *
    * This can be used to retain the default plugin functionality for some modules.
    *
-   * @returns `true` to externalize the module, `false` to bundle it, or `null`/`undefined` to make Rollup to decide.
+   * @returns `true` to externalize the module, `false` to bundle it, or `undefined` to make Rollup to decide.
    */
-  isExternal(): boolean | NullValue;
+  isExternal(): boolean | undefined;
 }
