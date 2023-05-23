@@ -9,11 +9,10 @@
 [![GitHub Project][github-image]][github-url]
 [![API Documentation][api-docs-image]][api documentation]
 
-**The issue.**: Rollup supports [external] option to externalize some of the dependencies and bundle the others.
-However, it's not trivial to implement sometimes. E.g. once dependency resolved, its ID becomes an absolute path rather
-package name. It is not so simple to decide whether the module should be external in this case.
+[Rollup] plugin helping to decide what modules to externalize, and what to bundle. It's not always easy, especially
+when plugins like node-resolve replace module names with file paths.
 
-**The solution.** This plugin does the following:
+By default, the plugin does the following:
 
 - Externalizes Node.js built-ins.
 
@@ -25,11 +24,9 @@ package name. It is not so simple to decide whether the module should be externa
 
   As they _expected to be added_ to the package that depends on bundled one.
 
-- Resolves module IDs back to their package names if necessary.
+- **Resolves module IDs back to their package names if necessary.**
 
-- Respects [external] option from Rollup configuration.
-
-- Bundles the rest of the imported modules.
+- Respects [external] option and other plug-ins resolutions.
 
 [npm-image]: https://img.shields.io/npm/v/rollup-plugin-unbundle.svg?logo=npm
 [npm-url]: https://www.npmjs.com/package/rollup-plugin-unbundle
@@ -47,6 +44,7 @@ package name. It is not so simple to decide whether the module should be externa
 [github-url]: https://github.com/run-z/rollup-plugin-unbundle
 [api-docs-image]: https://img.shields.io/static/v1?logo=typescript&label=API&message=docs&color=informational
 [API documentation]: https://run-z.github.io/rollup-plugin-unbundle
+[Rollup]: https://rollupjs.org/
 [external]: https://rollupjs.org/guide/en/#external
 [package dependencies]: https://docs.npmjs.com/cli/v8/configuring-npm/package-json#dependencies
 [package peerDependencies]: https://docs.npmjs.com/cli/v8/configuring-npm/package-json#peerdependencies
@@ -61,18 +59,7 @@ import unbundle from 'rollup-plugin-unbundle';
 
 export default {
   input: './src/index.js',
-  plugins: [nodeResolve(), unbundle(/* Unbundle options */)],
-  external: [
-    /*
-      List external deps here.
-
-      These can be package names, even though they are not necessarily listed
-      in `package.json`.
-
-      If you provide a function instead, make it return `null` or `undefined`
-      to allow the plugin to decide.
-    */
-  ],
+  plugins: [unbundle(/* Unbundle options */), nodeResolve()],
   output: {
     format: 'esm',
     sourcemap: true,
@@ -102,7 +89,7 @@ Current package is used as resolution root by default.
 
 This method decides whether to bundle the module or not.
 
-Unlike an [external] Rollup option, this method accepts `UnbundleRequest` class instance that helps making decisions.
+Unlike [external] Rollup option, this method accepts `UnbundleRequest` class instance that helps in making decisions.
 It has the following properties and methods:
 
 - `resolutionRoot` - Imports resolution root.
