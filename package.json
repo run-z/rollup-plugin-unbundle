@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-unbundle",
-  "version": "2.0.1",
+  "version": "3.0.0-dev.0",
   "description": "Rollup plugin for excluding dependencies from bundle",
   "keywords": [
     "rollup-plugin",
@@ -36,7 +36,7 @@
     }
   },
   "dependencies": {
-    "@run-z/npk": "^0.2.0"
+    "@run-z/npk": "^0.3.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
@@ -44,8 +44,8 @@
     "@run-z/eslint-config": "^3.3.1",
     "@run-z/prettier-config": "^2.0.0",
     "@types/node": "^18.16.14",
-    "@typescript-eslint/eslint-plugin": "^5.59.6",
-    "@typescript-eslint/parser": "^5.59.6",
+    "@typescript-eslint/eslint-plugin": "^5.59.7",
+    "@typescript-eslint/parser": "^5.59.7",
     "eslint": "^8.41.0",
     "eslint-plugin-jest": "^27.2.1",
     "gh-pages": "^5.0.0",
@@ -53,7 +53,7 @@
     "jest-junit": "^16.0.0",
     "prettier": "^2.8.8",
     "prettier-eslint-cli": "^7.1.0",
-    "rollup": "^3.22.1",
+    "rollup": "^3.23.0",
     "rollup-plugin-flat-dts": "^2.1.0",
     "run-z": "1.11.0-bootstrap",
     "shx": "^0.3.4",
