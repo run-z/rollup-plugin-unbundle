@@ -33,13 +33,12 @@ export interface UnbundleRequest {
   get importerId(): string | undefined;
 
   /**
-   * Preceding resolution request.
+   * Resolution request rewritten by this one.
    *
    * Resolutions may be chained. E.g. when `node-resolve` module resolves the module, it tries to continue resolution
-   * of just resolved identifier. In this case this property would contain previous request with module identifier
-   * reflecting preceding attempt.
+   * of just resolved identifier. This property would contain the original request in such case.
    */
-  get prevRequest(): UnbundleRequest | undefined;
+  get rewrittenRequest(): UnbundleRequest | undefined;
 
   /**
    * Resolves the module doing the import.

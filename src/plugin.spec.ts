@@ -143,16 +143,24 @@ describe('unbundle', () => {
       isExternal = () => true;
       await expect(resolve('unknown')).resolves.toBe(false);
     });
-    it('adjusts resolution by another plugin', async () => {
-      const resolution = {
+    it('externalizes resolution of another plugin', async () => {
+      fs.addRoot({
+        name: 'root',
+        version: '1.0.0',
+        dependencies: {
+          target: '^1.0.0',
+        },
+      });
+      fs.addPackage({
+        name: 'target',
+        version: '1.0.0',
+      });
+
+      const resolution = buildResolution({
         id: '/path/to/target',
         resolvedBy: 'test',
-        assertions: {},
         meta: { test: true },
-        external: false,
-        moduleSideEffects: true,
-        syntheticNamedExports: false,
-      };
+      });
 
       context.resolve.mockImplementation((source, _importer, _options) => {
         if (source === 'target') {
@@ -162,14 +170,56 @@ describe('unbundle', () => {
         return Promise.resolve(null);
       });
 
-      isExternal = () => true;
-
       const result = await resolve('target');
 
       expect(result).toEqual({
-        ...resolution,
+        id: 'target',
         external: true,
+        meta: {
+          unbundle: expect.any(Unbundle$Request),
+        },
       });
+    });
+    it('externalizes non-external resolution of another plugin', async () => {
+      fs.addRoot({
+        name: 'root',
+        version: '1.0.0',
+        dependencies: {
+          target: '^1.0.0',
+        },
+      });
+      fs.addPackage({
+        name: 'target',
+        version: '1.0.0',
+      });
+
+      const resolution = buildResolution({
+        id: 'target',
+        resolvedBy: 'test',
+        meta: { test: true },
+      });
+
+      context.resolve.mockImplementation((source, _importer, _options) => {
+        if (source === 'target') {
+          return Promise.resolve(resolution);
+        }
+
+        return Promise.resolve(null);
+      });
+
+      const result = (await resolve('target')) as ResolvedId;
+
+      expect(result).toEqual({
+        id: 'target',
+        external: true,
+        meta: {
+          unbundle: expect.any(Unbundle$Request),
+        },
+      });
+
+      const request = result.meta.unbundle as UnbundleRequest;
+
+      expect(request.isResolved).toBe(false);
     });
     it('resolves dependency recurrently', async () => {
       fs.addPackage(fs.root, {
@@ -196,14 +246,14 @@ describe('unbundle', () => {
 
       expect(result).toEqual({
         id: 'dep',
+        assertions: {},
         external: true,
         moduleSideEffects: false,
-        assertions: {},
+        syntheticNamedExports: false,
+        resolvedBy: 'unbundle',
         meta: {
           unbundle: expect.any(Unbundle$Request),
         },
-        resolvedBy: 'unbundle',
-        syntheticNamedExports: false,
       });
 
       const request = result.meta.unbundle as UnbundleRequest;
@@ -211,8 +261,28 @@ describe('unbundle', () => {
       expect(request.isResolved).toBe(true);
       expect(request.moduleId).toBe('package:dep/1.0.0');
       expect(request.importerId).toBeUndefined();
-      expect(request.prevRequest?.moduleId).toBe('dep');
-      expect(request.prevRequest?.importerId).toBeUndefined();
+      expect(request.rewrittenRequest?.moduleId).toBe('dep');
+      expect(request.rewrittenRequest?.importerId).toBeUndefined();
+    });
+    it('do not try to resolve recurrently for absolute path', async () => {
+      const resolution = buildResolution({
+        id: '/path/to/target',
+        meta: { test: true },
+        resolvedBy: 'test',
+      });
+
+      context.resolve.mockImplementation(async (source, importer, options) => {
+        if (source === 'dep') {
+          return (await resolveId('/path/to/target', importer, options)) ?? resolution;
+        }
+
+        return null;
+      });
+
+      const result = (await resolve('dep')) as ResolvedId;
+
+      expect(result).toEqual(resolution);
+      expect(result.meta.unbundle).toBeUndefined();
     });
     it('starts resolution over for another importer', async () => {
       fs.addPackage(fs.root, {
@@ -261,6 +331,19 @@ describe('unbundle', () => {
       expect(request.isResolved).toBe(false);
       expect(request.moduleId).toBe('package:dep/1.0.0');
       expect(request.importerId).toBe('package:another-importer/1.0.0');
+    });
+    it('resolves externalized self-reference', async () => {
+      isExternal = request => request.resolveModule().asSubPackage()?.importSpec.spec === '#private';
+
+      const result = (await resolve('#private')) as ResolvedId;
+
+      expect(result).toEqual({
+        id: '#private',
+        external: true,
+        meta: {
+          unbundle: expect.any(Unbundle$Request),
+        },
+      });
     });
     it('does not resolve synthetic imports', async () => {
       const result = await resolve('\0synthetic');
@@ -321,9 +404,18 @@ describe('unbundle', () => {
         isEntry?: boolean | undefined;
       } = {},
     ): Promise<ResolvedId | null> {
-      const { assertions = {}, custom } = options;
+      return buildResolution(await resolve(moduleId, importerId, options));
+    }
 
-      let result = await resolve(moduleId, importerId, options);
+    function buildResolution(
+      result: ResolveIdResult,
+      options: {
+        assertions?: Record<string, string> | undefined;
+        custom?: CustomPluginOptions | undefined;
+        isEntry?: boolean | undefined;
+      } = {},
+    ): ResolvedId | null {
+      const { assertions = {}, custom } = options;
 
       if (!result) {
         return null;

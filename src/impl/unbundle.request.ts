@@ -38,14 +38,14 @@ export class Unbundle$Request implements UnbundleRequest {
   }
 
   get isResolved(): boolean {
-    return !!this.prevRequest;
+    return !!this.rewrittenRequest;
   }
 
   get importerId(): string | undefined {
     return this.#importerId;
   }
 
-  get prevRequest(): Unbundle$Request | undefined {
+  get rewrittenRequest(): Unbundle$Request | undefined {
     return this.#prevRequest;
   }
 
@@ -54,7 +54,7 @@ export class Unbundle$Request implements UnbundleRequest {
   }
 
   #resolveImporter(): ImportResolution {
-    const { resolutionRoot, importerId, prevRequest } = this;
+    const { resolutionRoot, importerId, rewrittenRequest: prevRequest } = this;
 
     if (prevRequest) {
       return prevRequest.resolveImporter();
@@ -79,11 +79,9 @@ export class Unbundle$Request implements UnbundleRequest {
     const dependency = this.resolveDependency();
 
     if (!dependency) {
-      const { importSpec } = this.resolveModule();
       // Something is imported, but no dependency declared.
       // Bundle it, unless this is an URI.
-
-      return importSpec.kind === 'uri';
+      return this.resolveModule().importSpec.kind === 'uri';
     }
 
     const { kind } = dependency;
@@ -117,12 +115,12 @@ export class Unbundle$Request implements UnbundleRequest {
 
     switch (kind) {
       case 'synthetic':
-        // No decision on synthetic dependency.
+      case 'self':
+        // No decision on self-dependencies and synthetic ones.
         return;
       case 'implied':
         // Node.js dependencies considered free of side effects.
         return false;
-      case 'self':
       case 'runtime':
       case 'peer':
       case 'dev':
@@ -155,7 +153,7 @@ export class Unbundle$Request implements UnbundleRequest {
     return;
   }
 
-  continueResolution({
+  rewrite({
     moduleId,
     importerId,
   }: {
