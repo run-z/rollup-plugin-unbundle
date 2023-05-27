@@ -6,26 +6,25 @@ describe('UnbundleRequest', () => {
   let fs: VirtualPackageFS;
   let resolutionRoot: PackageResolution;
 
-  beforeEach(() => {
-    fs = new VirtualPackageFS();
-    fs.addPackage(fs.root, {
+  beforeEach(async () => {
+    fs = new VirtualPackageFS().addRoot({
       name: 'root',
       version: '1.0.0',
     });
-    resolutionRoot = resolveRootPackage(fs);
+    resolutionRoot = await resolveRootPackage(fs);
   });
 
   describe('resolveImporter', () => {
-    it('uses resolution root when unspecified', () => {
+    it('uses resolution root when unspecified', async () => {
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'package:root/subpath',
       });
 
-      expect(request.resolveImporter()).toBe(resolutionRoot);
+      await expect(request.resolveImporter()).resolves.toBe(resolutionRoot);
     });
-    it('resolves importer when specified', () => {
-      fs.addPackage(fs.root, {
+    it('resolves importer when specified', async () => {
+      fs.addRoot({
         name: 'root',
         version: '1.0.0',
         dependencies: {
@@ -39,44 +38,46 @@ describe('UnbundleRequest', () => {
           dep2: '^1.0.0',
         },
       });
+      resolutionRoot = await resolveRootPackage(fs);
 
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'package:root/subpath',
         importerId: 'dep1',
       });
+      const importer = await request.resolveImporter();
 
-      expect(request.resolveImporter().asPackage()?.packageInfo.name).toBe('dep1');
+      expect(importer.asPackage()?.packageInfo.name).toBe('dep1');
     });
   });
 
   describe('isExternal()', () => {
-    it('returns none for the module itself', () => {
+    it('returns none for the module itself', async () => {
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'package:root/subpath',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('self');
-      expect(request.isExternal()).toBeUndefined();
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'self' });
+      await expect(request.isExternal()).resolves.toBeUndefined();
     });
-    it('returns none for synthetic module', () => {
+    it('returns none for synthetic module', async () => {
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: '\0unknown',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('synthetic');
-      expect(request.isExternal()).toBeUndefined();
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'synthetic' });
+      await expect(request.isExternal()).resolves.toBeUndefined();
     });
-    it('returns true for Node built-ins', () => {
+    it('returns true for Node built-ins', async () => {
       const request = new Unbundle$Request({ resolutionRoot, moduleId: 'node:fs' });
 
-      expect(request.resolveDependency()?.kind).toBe('implied');
-      expect(request.isExternal()).toBe(true);
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'implied' });
+      await expect(request.isExternal()).resolves.toBe(true);
     });
-    it('returns true for runtime dependency', () => {
-      fs.addPackage(fs.root, {
+    it('returns true for runtime dependency', async () => {
+      fs.addRoot({
         name: 'root',
         version: '1.0.0',
         dependencies: {
@@ -87,17 +88,18 @@ describe('UnbundleRequest', () => {
         name: 'dep',
         version: '1.0.0',
       });
+      resolutionRoot = await resolveRootPackage(fs);
 
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'dep',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('runtime');
-      expect(request.isExternal()).toBe(true);
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'runtime' });
+      await expect(request.isExternal()).resolves.toBe(true);
     });
-    it('returns true for peer dependency', () => {
-      fs.addPackage(fs.root, {
+    it('returns true for peer dependency', async () => {
+      fs.addRoot({
         name: 'root',
         version: '1.0.0',
         peerDependencies: {
@@ -111,17 +113,18 @@ describe('UnbundleRequest', () => {
         name: 'dep',
         version: '1.0.0',
       });
+      resolutionRoot = await resolveRootPackage(fs);
 
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'dep',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('peer');
-      expect(request.isExternal()).toBe(true);
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'peer' });
+      await expect(request.isExternal()).resolves.toBe(true);
     });
-    it('returns false for dev dependency', () => {
-      fs.addPackage(fs.root, {
+    it('returns false for dev dependency', async () => {
+      fs.addRoot({
         name: 'root',
         version: '1.0.0',
         devDependencies: {
@@ -132,62 +135,63 @@ describe('UnbundleRequest', () => {
         name: 'dep',
         version: '1.0.0',
       });
+      resolutionRoot = await resolveRootPackage(fs);
 
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'dep',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('dev');
-      expect(request.isExternal()).toBe(false);
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'dev' });
+      await expect(request.isExternal()).resolves.toBe(false);
     });
-    it('returns false for unknown package', () => {
+    it('returns false for unknown package', async () => {
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'unknown',
       });
 
-      expect(request.resolveDependency()).toBeNull();
-      expect(request.isExternal()).toBe(false);
+      await expect(request.resolveDependency()).resolves.toBeNull();
+      await expect(request.isExternal()).resolves.toBe(false);
     });
-    it('returns true for URI', () => {
+    it('returns true for URI', async () => {
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'http://localhost/dep',
       });
 
-      expect(request.resolveDependency()).toBeNull();
-      expect(request.isExternal()).toBe(true);
+      await expect(request.resolveDependency()).resolves.toBeNull();
+      await expect(request.isExternal()).resolves.toBe(true);
     });
   });
 
   describe('hasSideEffects()', () => {
-    it('returns none for the module itself', () => {
+    it('returns none for the module itself', async () => {
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'package:root/subpath',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('self');
-      expect(request.hasSideEffects()).toBeUndefined();
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'self' });
+      await expect(request.hasSideEffects()).resolves.toBeUndefined();
     });
-    it('returns none for synthetic module', () => {
+    it('returns none for synthetic module', async () => {
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: '\0unknown',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('synthetic');
-      expect(request.hasSideEffects()).toBeUndefined();
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'synthetic' });
+      await expect(request.hasSideEffects()).resolves.toBeUndefined();
     });
-    it('returns false for Node built-ins', () => {
+    it('returns false for Node built-ins', async () => {
       const request = new Unbundle$Request({ resolutionRoot, moduleId: 'node:fs' });
 
-      expect(request.resolveDependency()?.kind).toBe('implied');
-      expect(request.hasSideEffects()).toBe(false);
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'implied' });
+      await expect(request.hasSideEffects()).resolves.toBe(false);
     });
-    it('returns none for dependency without sideEffects specified', () => {
-      fs.addPackage(fs.root, {
+    it('returns none for dependency without sideEffects specified', async () => {
+      fs.addRoot({
         name: 'root',
         version: '1.0.0',
         dependencies: {
@@ -198,17 +202,18 @@ describe('UnbundleRequest', () => {
         name: 'dep',
         version: '1.0.0',
       });
+      resolutionRoot = await resolveRootPackage(fs);
 
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'dep',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('runtime');
-      expect(request.hasSideEffects()).toBeUndefined();
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'runtime' });
+      await expect(request.hasSideEffects()).resolves.toBeUndefined();
     });
-    it('returns none for dependency with sideEffects set to wrong value', () => {
-      fs.addPackage(fs.root, {
+    it('returns none for dependency with sideEffects set to wrong value', async () => {
+      fs.addRoot({
         name: 'root',
         version: '1.0.0',
         dependencies: {
@@ -220,17 +225,18 @@ describe('UnbundleRequest', () => {
         version: '1.0.0',
         sideEffects: 1,
       });
+      resolutionRoot = await resolveRootPackage(fs);
 
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'dep',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('runtime');
-      expect(request.hasSideEffects()).toBeUndefined();
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'runtime' });
+      await expect(request.hasSideEffects()).resolves.toBeUndefined();
     });
-    it('returns true for dependency with sideEffects: true', () => {
-      fs.addPackage(fs.root, {
+    it('returns true for dependency with sideEffects: true', async () => {
+      fs.addRoot({
         name: 'root',
         version: '1.0.0',
         dependencies: {
@@ -242,17 +248,18 @@ describe('UnbundleRequest', () => {
         version: '1.0.0',
         sideEffects: true,
       });
+      resolutionRoot = await resolveRootPackage(fs);
 
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'dep',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('runtime');
-      expect(request.hasSideEffects()).toBe(true);
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'runtime' });
+      await expect(request.hasSideEffects()).resolves.toBe(true);
     });
-    it('returns false for dependency with sideEffects: false', () => {
-      fs.addPackage(fs.root, {
+    it('returns false for dependency with sideEffects: false', async () => {
+      fs.addRoot({
         name: 'root',
         version: '1.0.0',
         dependencies: {
@@ -264,23 +271,24 @@ describe('UnbundleRequest', () => {
         version: '1.0.0',
         sideEffects: false,
       });
+      resolutionRoot = await resolveRootPackage(fs);
 
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'dep',
       });
 
-      expect(request.resolveDependency()?.kind).toBe('runtime');
-      expect(request.hasSideEffects()).toBe(false);
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'runtime' });
+      await expect(request.hasSideEffects()).resolves.toBe(false);
     });
-    it('returns undefined for unknown dependency', () => {
+    it('returns undefined for unknown dependency', async () => {
       const request = new Unbundle$Request({
         resolutionRoot,
         moduleId: 'dep',
       });
 
-      expect(request.resolveDependency()).toBeNull();
-      expect(request.hasSideEffects()).toBeUndefined();
+      await expect(request.resolveDependency()).resolves.toBeNull();
+      await expect(request.hasSideEffects()).resolves.toBeUndefined();
     });
   });
 });

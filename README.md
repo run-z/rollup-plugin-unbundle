@@ -79,18 +79,24 @@ options.
 
 ### `resolutionRoot`
 
-Either a path to the root package, or an `ImportResolution` class instance.
+Resolution root of the imports.
 
-All imports will be resolved against this root.
+One of:
 
-Current package is used as resolution root by default.
+- path to the root package directory,
+- an `ImportResolution` instance (may cause issues with watch mode), or
+- a function returning `ImportResolution` instance or a promise-like instance resolving to one.
+
+By default, new resolution root will be created for the package in current working directory.
 
 ### `isExternal`
 
-This method decides whether to bundle the module or not.
+This method decides whether to bundle the module or not. May be asynchronous.
 
-Unlike [external] Rollup option, this method accepts `UnbundleRequest` class instance that helps in making decisions.
-It has the following properties and methods:
+Unlike [external] Rollup option, this method can be asynchronous. It accepts `UnbundleRequest` class instance that
+helps in making decisions.
+
+`UnbundleRequest` has the following API:
 
 - `resolutionRoot` - Imports resolution root.
 
@@ -100,12 +106,12 @@ It has the following properties and methods:
 
 - `importerId` - The identifier of the module doing the import, if known.
 
-- `resolveImporter()` - Resolves the module doing the import.
+- `resolveImporter()` - Asynchronously resolves the module doing the import.
 
   Either the importer module, or resolution root when the former is missing.
 
-- `resolveModule()` - Resolves the module in question.
+- `resolveModule()` - Asynchronously resolves the module in question.
 
-- `isExternal()` - Checks whether the module should be bundled or not according to default plugin logic.
+- `isExternal()` - Asynchronously checks whether the module should be bundled or not according to default plugin logic.
 
   This can be used to retain the default plugin functionality for some modules.

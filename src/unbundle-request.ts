@@ -43,24 +43,25 @@ export interface UnbundleRequest {
   /**
    * Resolves the module doing the import.
    *
-   * @returns Either resolved {@link importerId importer module}, or {@link resolutionRoot resolution root}
-   * when the latter is missing.
+   * @returns Promise resolved to either {@link resolveModule importer module}, or {@link resolutionRoot resolution
+   * root} when the latter is missing.
    */
-  resolveImporter(): ImportResolution;
+  resolveImporter(): Promise<ImportResolution>;
 
   /**
    * Resolves the {@link moduleId module in question}.
    *
-   * @returns Imported module resolution.
+   * @returns Promise resolved to imported module.
    */
-  resolveModule(): ImportResolution;
+  resolveModule(): Promise<ImportResolution>;
 
   /**
    * Checks whether the module should be bundled or not according to default plugin logic.
    *
    * This can be used to retain the default plugin functionality for some modules.
    *
-   * @returns `true` to externalize the module, `false` to bundle it, or `undefined` to make Rollup to decide.
+   * @returns Promise resolved to `true` to externalize the module, `false` to bundle it, or `undefined` to make Rollup
+   * to decide.
    */
-  isExternal(): boolean | undefined;
+  isExternal(): Promise<boolean | undefined>;
 }
