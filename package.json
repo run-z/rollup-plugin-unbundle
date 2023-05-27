@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-unbundle",
-  "version": "3.0.0-dev.0",
+  "version": "3.0.0-dev.1",
   "description": "Rollup plugin for excluding dependencies from bundle",
   "keywords": [
     "rollup-plugin",
