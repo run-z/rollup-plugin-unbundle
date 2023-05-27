@@ -7,13 +7,21 @@ import { UnbundleRequest } from './unbundle-request.js';
  */
 export interface UnbundleOptions {
   /**
-   * Imports resolution root.
+   * Resolution root of the imports.
    *
-   * Either a path to the root package, or an `ImportResolution` class instance.
+   * One of:
    *
-   * By default, new resolution root will be created for current package.
+   * - path to the root package directory,
+   * - an `ImportResolution` instance (may cause issues with watch mode), or
+   * - a function returning `ImportResolution` instance or a promise-like instance resolving to one.
+   *
+   * By default, new resolution root will be created for the package in current working directory.
    */
-  readonly resolutionRoot?: string | ImportResolution | undefined;
+  readonly resolutionRoot?:
+    | string
+    | ImportResolution
+    | (() => ImportResolution | PromiseLike<ImportResolution>)
+    | undefined;
 
   /**
    * Decides whether to bundle the module or not.
@@ -29,7 +37,8 @@ export interface UnbundleOptions {
    *
    * @param request - Unbundle request.
    *
-   * @returns `true` to externalize module, `false` to bundle it, or `null`/`undefined` to make Rollup to decide.
+   * @returns `true` to externalize module, `false` to bundle it, `null`/`undefined` to make Rollup to decide,
+   * or a promise-like instance resolved to one of the above.
    */
-  isExternal?(request: UnbundleRequest): boolean | NullValue;
+  isExternal?(request: UnbundleRequest): boolean | NullValue | PromiseLike<boolean | NullValue>;
 }

@@ -1,4 +1,4 @@
-import type { DependencyResolution, ImportResolution } from '@run-z/npk';
+import type { ImportDependency, ImportResolution, SubPackageResolution } from '@run-z/npk';
 import type { UnbundleRequest } from '../unbundle-request.js';
 
 export class Unbundle$Request implements UnbundleRequest {
@@ -8,9 +8,9 @@ export class Unbundle$Request implements UnbundleRequest {
   readonly #prevRequest: Unbundle$Request | undefined;
   readonly #importerId: string | undefined;
 
-  #importerResolution?: ImportResolution;
-  #moduleResolution?: ImportResolution;
-  #dependencyResolution?: DependencyResolution | null;
+  #importerResolution?: Promise<ImportResolution>;
+  #moduleResolution?: Promise<ImportResolution>;
+  #dependency?: Promise<ImportDependency | null>;
 
   constructor({
     resolutionRoot,
@@ -49,39 +49,52 @@ export class Unbundle$Request implements UnbundleRequest {
     return this.#prevRequest;
   }
 
-  resolveImporter(): ImportResolution {
+  resolveImporter(): Promise<ImportResolution> {
     return (this.#importerResolution ??= this.#resolveImporter());
   }
 
-  #resolveImporter(): ImportResolution {
+  async #resolveImporter(): Promise<ImportResolution> {
     const { resolutionRoot, importerId, rewrittenRequest: prevRequest } = this;
 
     if (prevRequest) {
-      return prevRequest.resolveImporter();
+      return await prevRequest.resolveImporter();
+    }
+    if (importerId == null) {
+      return resolutionRoot;
     }
 
-    return importerId != null ? resolutionRoot.resolveImport(importerId) : resolutionRoot;
+    return await resolutionRoot.resolveImport(importerId);
   }
 
-  resolveModule(): ImportResolution {
-    return (this.#moduleResolution ??= this.resolveImporter().resolveImport(this.moduleId));
+  resolveModule(): Promise<ImportResolution> {
+    return (this.#moduleResolution ??= this.#resolveModule());
   }
 
-  resolveDependency(): DependencyResolution | null {
-    if (this.#dependencyResolution === undefined) {
-      this.#dependencyResolution = this.resolutionRoot.resolveDependency(this.resolveModule());
-    }
+  async #resolveModule(): Promise<ImportResolution> {
+    const importer = await this.resolveImporter();
 
-    return this.#dependencyResolution;
+    return importer.resolveImport(this.moduleId);
   }
 
-  isExternal(): boolean | undefined {
-    const dependency = this.resolveDependency();
+  resolveDependency(): Promise<ImportDependency | null> {
+    return (this.#dependency ??= this.#resolveDependency());
+  }
+
+  async #resolveDependency(): Promise<ImportDependency | null> {
+    const resolved = await this.resolveModule();
+
+    return this.resolutionRoot.resolveDependency(resolved);
+  }
+
+  async isExternal(): Promise<boolean | undefined> {
+    const dependency = await this.resolveDependency();
 
     if (!dependency) {
       // Something is imported, but no dependency declared.
       // Bundle it, unless this is an URI.
-      return this.resolveModule().importSpec.kind === 'uri';
+      const resolved = await this.resolveModule();
+
+      return resolved.importSpec.kind === 'uri';
     }
 
     const { kind } = dependency;
@@ -103,15 +116,15 @@ export class Unbundle$Request implements UnbundleRequest {
     }
   }
 
-  hasSideEffects(): boolean | undefined {
-    const dependency = this.resolveDependency();
+  async hasSideEffects(): Promise<boolean | undefined> {
+    const dependency = await this.resolveDependency();
 
     if (!dependency) {
       // Can not decide.
       return;
     }
 
-    const { kind } = dependency;
+    const { kind, on } = dependency;
 
     switch (kind) {
       case 'synthetic':
@@ -124,21 +137,18 @@ export class Unbundle$Request implements UnbundleRequest {
       case 'runtime':
       case 'peer':
       case 'dev':
-        return this.#packageHasSideEffects();
+        // Detect based on `sideEffect` property in `package.json`.
+        return this.#packageHasSideEffects(on);
     }
   }
 
-  #packageHasSideEffects(): boolean | undefined {
-    const resolved = this.resolveModule();
-    const { host } = resolved;
-
-    // Detect based on `sideEffect` property in `package.json`.
-    const {
+  #packageHasSideEffects({
+    host: {
       packageInfo: {
         packageJson: { sideEffects },
       },
-    } = host!;
-
+    },
+  }: SubPackageResolution): boolean | undefined {
     if (sideEffects == null) {
       // `sideEffects` unspecified.
       return;
