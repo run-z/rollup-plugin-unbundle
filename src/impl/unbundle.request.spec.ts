@@ -1,16 +1,15 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import { PackageResolution, VirtualPackageFS, resolveRootPackage } from '@run-z/npk';
+import { PackageResolution, resolveRootPackage } from '@run-z/npk';
+import { TestPackageFS } from './test-package-fs.js';
 import { Unbundle$Request } from './unbundle.request.js';
 
 describe('UnbundleRequest', () => {
-  let fs: VirtualPackageFS;
+  let fs: TestPackageFS;
   let resolutionRoot: PackageResolution;
 
   beforeEach(async () => {
-    fs = new VirtualPackageFS().addRoot({
-      name: 'root',
-      version: '1.0.0',
-    });
+    fs = await TestPackageFS.create();
+
     resolutionRoot = await resolveRootPackage(fs);
   });
 

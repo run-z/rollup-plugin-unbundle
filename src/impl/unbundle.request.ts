@@ -83,7 +83,9 @@ export class Unbundle$Request implements UnbundleRequest {
   async #resolveDependency(): Promise<ImportDependency | null> {
     const resolved = await this.resolveModule();
 
-    return this.resolutionRoot.resolveDependency(resolved);
+    return this.resolutionRoot.resolveDependency(resolved, {
+      via: await this.resolveImporter(),
+    });
   }
 
   async isExternal(): Promise<boolean | undefined> {

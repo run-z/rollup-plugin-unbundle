@@ -4,7 +4,6 @@
 export type * from './unbundle-options.js';
 export type * from './unbundle-request.js';
 import {
-  recognizeImport,
   resolveRootPackage,
   type ImportDependency,
   type ImportResolution,
@@ -69,7 +68,7 @@ export default function unbundle(options: UnbundleOptions = {}): UnbundlePlugin 
         request = new Unbundle$Request({ resolutionRoot, moduleId, importerId });
       } else {
         // Recurrent request.
-        const importSpec = recognizeImport(moduleId);
+        const importSpec = resolutionRoot.fs.recognizeImport(moduleId);
 
         if (importSpec.kind === 'path' && !importSpec.isRelative) {
           // Do not try to resolve absolute path.

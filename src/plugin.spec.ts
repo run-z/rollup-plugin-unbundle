@@ -1,6 +1,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { VirtualPackageFS, resolveRootPackage } from '@run-z/npk';
+import { resolveRootPackage } from '@run-z/npk';
 import { CustomPluginOptions, Plugin, PluginContext, ResolveIdResult, ResolvedId } from 'rollup';
+import { TestPackageFS } from './impl/test-package-fs.js';
 import { Unbundle$Request } from './impl/unbundle.request.js';
 import unbundle, {
   type UnbundleOptions,
@@ -9,13 +10,10 @@ import unbundle, {
 } from './plugin.js';
 
 describe('unbundle', () => {
-  let fs: VirtualPackageFS;
+  let fs: TestPackageFS;
 
-  beforeEach(() => {
-    fs = new VirtualPackageFS().addRoot({
-      name: 'root',
-      version: '1.0.0',
-    });
+  beforeEach(async () => {
+    fs = await TestPackageFS.create();
   });
 
   let context: jest.MockedObject<PluginContext>;
