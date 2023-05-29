@@ -73,7 +73,7 @@ export class Unbundle$Request implements UnbundleRequest {
   async #resolveModule(): Promise<ImportResolution> {
     const importer = await this.resolveImporter();
 
-    return importer.resolveImport(this.moduleId);
+    return await importer.resolveImport(this.moduleId);
   }
 
   resolveDependency(): Promise<ImportDependency | null> {
