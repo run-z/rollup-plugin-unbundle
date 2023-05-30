@@ -280,6 +280,65 @@ describe('UnbundleRequest', () => {
       await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'runtime' });
       await expect(request.hasSideEffects()).resolves.toBe(false);
     });
+    it('returns true for matching sideEffects entry', async () => {
+      fs.addRoot({
+        name: 'root',
+        version: '1.0.0',
+        dependencies: {
+          dep: '^1.0.0',
+        },
+      });
+      fs.addPackage(
+        {
+          name: 'dep',
+          version: '1.0.0',
+          sideEffects: ['*.js'],
+        },
+        {
+          deref: { '/with-side-effects': './dist/with-side-effects.js' },
+        },
+      );
+      resolutionRoot = await resolveRootPackage(fs);
+
+      const request = new Unbundle$Request({
+        resolutionRoot,
+        moduleId: 'dep/with-side-effects',
+      });
+
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'runtime' });
+      await expect(request.hasSideEffects()).resolves.toBe(true);
+    });
+    it('returns false for unmatched sideEffects entry', async () => {
+      fs.addRoot({
+        name: 'root',
+        version: '1.0.0',
+        dependencies: {
+          dep: '^1.0.0',
+        },
+      });
+      fs.addPackage(
+        {
+          name: 'dep',
+          version: '1.0.0',
+          sideEffects: ['./dist/with-side-effects.js'],
+        },
+        {
+          deref: {
+            '/with-side-effects': './dist/with-side-effects.js',
+            '/without-side-effects': './dist/without-side-effects.js',
+          },
+        },
+      );
+      resolutionRoot = await resolveRootPackage(fs);
+
+      const request = new Unbundle$Request({
+        resolutionRoot,
+        moduleId: 'dep/without-side-effects',
+      });
+
+      await expect(request.resolveDependency()).resolves.toMatchObject({ kind: 'runtime' });
+      await expect(request.hasSideEffects()).resolves.toBe(false);
+    });
     it('returns undefined for unknown dependency', async () => {
       const request = new Unbundle$Request({
         resolutionRoot,
