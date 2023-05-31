@@ -1,5 +1,6 @@
-import type { ImportDependency, ImportResolution, SubPackageResolution } from '@run-z/npk';
+import type { ImportDependency, ImportResolution } from '@run-z/npk';
 import type { UnbundleRequest } from '../unbundle-request.js';
+import { moduleHasSideEffects } from './module-has-side-effects.js';
 
 export class Unbundle$Request implements UnbundleRequest {
 
@@ -123,7 +124,7 @@ export class Unbundle$Request implements UnbundleRequest {
 
     if (!dependency) {
       // Can not decide.
-      return;
+      return moduleHasSideEffects(await this.resolveModule());
     }
 
     const { kind, on } = dependency;
@@ -140,29 +141,8 @@ export class Unbundle$Request implements UnbundleRequest {
       case 'peer':
       case 'dev':
         // Detect based on `sideEffect` property in `package.json`.
-        return this.#packageHasSideEffects(on);
+        return moduleHasSideEffects(on);
     }
-  }
-
-  #packageHasSideEffects({
-    host: {
-      packageInfo: {
-        packageJson: { sideEffects },
-      },
-    },
-  }: SubPackageResolution): boolean | undefined {
-    if (sideEffects == null) {
-      // `sideEffects` unspecified.
-      return;
-    }
-    if (typeof sideEffects === 'boolean') {
-      // Explicit `sideEffects` flag.
-      return sideEffects;
-    }
-
-    // TODO: Handle `sideEffects` pattern.
-    // Unknown `sideEffects` format.
-    return;
   }
 
   rewrite({
@@ -170,7 +150,7 @@ export class Unbundle$Request implements UnbundleRequest {
     importerId,
   }: {
     readonly moduleId: string;
-    readonly importerId: string | undefined;
+    readonly importerId?: string | undefined;
   }): Unbundle$Request {
     return new Unbundle$Request({
       resolutionRoot: this.resolutionRoot,
