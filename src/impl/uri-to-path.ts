@@ -1,4 +1,4 @@
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import path from 'node:path';
 
 export function uriToPath(uri: string): string {
   const { pathname } = new URL(uri);
@@ -6,16 +6,9 @@ export function uriToPath(uri: string): string {
   console.debug(
     uri,
     pathname,
-    pathname.replace(FIRST_PATH_CHAR_PATTERN, char => `/${char}`),
-    pathToFileURL(process.cwd()),
+    path.parse(process.cwd()).root,
+    path.join(path.parse(process.cwd()).root, pathname),
   );
 
-  return fileURLToPath(
-    new URL(
-      pathname.replace(FIRST_PATH_CHAR_PATTERN, char => `/${char}`),
-      pathToFileURL(process.cwd()),
-    ).href,
-  );
+  return path.resolve(path.parse(process.cwd()).root, pathname);
 }
-
-const FIRST_PATH_CHAR_PATTERN = /^[^/]/;
