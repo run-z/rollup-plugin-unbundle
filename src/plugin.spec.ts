@@ -2,13 +2,13 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@j
 import { resolveRootPackage } from '@run-z/npk';
 import path from 'node:path';
 import { CustomPluginOptions, Plugin, PluginContext, ResolveIdResult, ResolvedId } from 'rollup';
-import { TestPackageFS } from './impl/test-package-fs.js';
 import { Unbundle$Request } from './impl/unbundle.request.js';
 import unbundle, {
   type UnbundleOptions,
   type UnbundlePlugin,
   type UnbundleRequest,
 } from './plugin.js';
+import { TestPackageFS } from './spec/test-package-fs.js';
 
 describe('unbundle', () => {
   let fs: TestPackageFS;

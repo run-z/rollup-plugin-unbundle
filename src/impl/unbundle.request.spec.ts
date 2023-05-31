@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { PackageResolution, resolveRootPackage } from '@run-z/npk';
-import { TestPackageFS } from './test-package-fs.js';
+import { TestPackageFS } from '../spec/test-package-fs.js';
 import { Unbundle$Request } from './unbundle.request.js';
 
 describe('UnbundleRequest', () => {

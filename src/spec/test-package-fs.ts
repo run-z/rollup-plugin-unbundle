@@ -18,7 +18,20 @@ export class TestPackageFS extends VirtualPackageFS {
   }
 
   recognizeImport(spec: string): Import {
-    return this.#nodeFS.recognizeImport(spec);
+    const importSpec = this.#nodeFS.recognizeImport(spec);
+
+    if (importSpec.kind === 'uri') {
+      if (importSpec.scheme === 'file') {
+        return {
+          ...importSpec,
+          spec: importSpec.spec.replace(/^file:/, 'package:'),
+          scheme: 'package',
+          path: importSpec.spec.replace(/^\//, ''),
+        };
+      }
+    }
+
+    return importSpec;
   }
 
 }
