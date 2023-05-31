@@ -1,4 +1,6 @@
 import { Import, NodePackageFS, VirtualPackageFS } from '@run-z/npk';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export class TestPackageFS extends VirtualPackageFS {
 
@@ -17,21 +19,41 @@ export class TestPackageFS extends VirtualPackageFS {
     });
   }
 
-  recognizeImport(spec: string): Import {
+  override recognizeImport(spec: string): Import {
     const importSpec = this.#nodeFS.recognizeImport(spec);
 
     if (importSpec.kind === 'uri') {
       if (importSpec.scheme === 'file') {
+        const pkgURI = this.#fileToPackageURI(importSpec.spec);
+
         return {
           ...importSpec,
-          spec: importSpec.spec.replace(/^file:/, 'package:'),
+          spec: pkgURI,
           scheme: 'package',
-          path: importSpec.spec.replace(/^\//, ''),
+          path: new URL(pkgURI).pathname,
+        };
+      }
+    } else if (importSpec.kind === 'path') {
+      if (!importSpec.isRelative) {
+        return {
+          ...importSpec,
+          uri: this.#fileToPackageURI(importSpec.uri),
         };
       }
     }
 
     return importSpec;
+  }
+
+  #fileToPackageURI(uri: string): string {
+    if (uri.startsWith('/')) {
+      return `package:${uri.slice(1)}`;
+    }
+
+    const filePath = fileURLToPath(uri);
+    const root = pathToFileURL(path.parse(filePath).root).href;
+
+    return `package:${uri.slice(root.length)}`;
   }
 
 }
