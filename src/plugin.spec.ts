@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { resolveRootPackage } from '@run-z/npk';
+import path from 'node:path';
 import { CustomPluginOptions, Plugin, PluginContext, ResolveIdResult, ResolvedId } from 'rollup';
 import { TestPackageFS } from './impl/test-package-fs.js';
 import { Unbundle$Request } from './impl/unbundle.request.js';
@@ -28,6 +29,12 @@ describe('unbundle', () => {
 
   afterEach(() => {
     ((plugin as Plugin).closeBundle as (this: PluginContext) => void).call(context);
+  });
+
+  let alreadyResolved: Set<string>;
+
+  beforeEach(() => {
+    alreadyResolved = new Set<string>();
   });
 
   describe('init', () => {
@@ -393,6 +400,47 @@ describe('unbundle', () => {
         },
       });
     });
+    it('dereferences package', async () => {
+      fs.addRoot({
+        name: 'root',
+        version: '1.0.0',
+        devDependencies: {
+          dep: '^1.0.0',
+        },
+      });
+      fs.addPackage(
+        {
+          name: 'dep',
+          version: '1.0.0',
+        },
+        {
+          deref: { '': './dist/index.js' },
+        },
+      );
+
+      context.resolve.mockImplementation(
+        async (source, importer, options) => await resolveId(source, importer, options),
+      );
+
+      const result = (await resolve('dep')) as ResolvedId;
+
+      expect(result).toEqual(
+        buildResolution({
+          id: path.resolve('/dep/1.0.0/dist/index.js'),
+          external: false,
+          meta: {
+            unbundle: expect.any(Unbundle$Request),
+          },
+        }),
+      );
+
+      const request = result.meta.unbundle as UnbundleRequest;
+
+      expect(request.isResolved).toBe(true);
+      expect(request.moduleId).toBe(path.resolve('/dep/1.0.0/dist/index.js'));
+      expect(request.rewrittenRequest?.moduleId).toBe('dep');
+      expect(request.importerId).toBeUndefined();
+    });
     it('does not resolve synthetic imports', async () => {
       const result = await resolve('\0synthetic');
 
@@ -435,6 +483,12 @@ describe('unbundle', () => {
       isEntry?: boolean | undefined;
     } = {},
   ): Promise<ResolveIdResult> {
+    if (alreadyResolved.has(moduleId)) {
+      return null;
+    }
+
+    alreadyResolved.add(moduleId);
+
     const { assertions = {}, isEntry = true } = options;
 
     return await plugin.resolveId.call(context, moduleId, importerId, {

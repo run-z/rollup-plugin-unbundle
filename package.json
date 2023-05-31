@@ -36,7 +36,7 @@
     }
   },
   "dependencies": {
-    "@run-z/npk": "^0.5.0",
+    "@run-z/npk": "^0.6.0",
     "minimatch": "^9.0.1"
   },
   "devDependencies": {

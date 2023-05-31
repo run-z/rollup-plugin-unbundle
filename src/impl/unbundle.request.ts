@@ -150,7 +150,7 @@ export class Unbundle$Request implements UnbundleRequest {
     importerId,
   }: {
     readonly moduleId: string;
-    readonly importerId: string | undefined;
+    readonly importerId?: string | undefined;
   }): Unbundle$Request {
     return new Unbundle$Request({
       resolutionRoot: this.resolutionRoot,

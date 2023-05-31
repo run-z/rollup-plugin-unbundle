@@ -3,12 +3,7 @@
  */
 export type * from './unbundle-options.js';
 export type * from './unbundle-request.js';
-import {
-  resolveRootPackage,
-  type ImportDependency,
-  type ImportResolution,
-  type SubPackageResolution,
-} from '@run-z/npk';
+import { resolveRootPackage, type ImportDependency, type ImportResolution } from '@run-z/npk';
 import type {
   CustomPluginOptions,
   MakeAsync,
@@ -16,8 +11,10 @@ import type {
   PluginContext,
   ResolveIdHook,
   ResolveIdResult,
+  ResolvedId,
 } from 'rollup';
 import { Unbundle$Request } from './impl/unbundle.request.js';
+import { uriToPath } from './impl/uri-to-path.js';
 import type { UnbundleOptions } from './unbundle-options.js';
 
 /**
@@ -57,20 +54,34 @@ export default function unbundle(options: UnbundleOptions = {}): UnbundlePlugin 
       },
     ): Promise<ResolveIdResult> {
       const { custom = {} } = options;
-      const { unbundle: rewrittenRequest } = custom;
+      const { unbundle: { request: rewrittenRequest, resolvePath } = {} } = custom;
       let request: Unbundle$Request;
+
+      const next = async (
+        moduleId: string,
+        {
+          resolvePath = false,
+        }: {
+          readonly resolvePath?: boolean | undefined;
+        } = {},
+      ): Promise<ResolvedId | null> => await this.resolve(moduleId, importerId, {
+          ...options,
+          skipSelf: !resolvePath, // Prevent recurrent requests with the same `moduleId` and `importerId`.
+          custom: { ...custom, unbundle: { request, resolvePath } },
+        });
 
       if (!resolutionRoot) {
         resolutionRoot = await createResolutionRoot();
       }
 
+      const importSpec = resolutionRoot.fs.recognizeImport(moduleId);
+      const isAbsolutePath = importSpec.kind === 'path' && !importSpec.isRelative;
+
       if (!rewrittenRequest) {
         request = new Unbundle$Request({ resolutionRoot, moduleId, importerId });
       } else {
         // Recurrent request.
-        const importSpec = resolutionRoot.fs.recognizeImport(moduleId);
-
-        if (importSpec.kind === 'path' && !importSpec.isRelative) {
+        if (!resolvePath && isAbsolutePath) {
           // Do not try to resolve absolute path.
           // Such request may be sent e.g. by `node-resolve` after it resolves module ID to module path.
           return;
@@ -79,11 +90,7 @@ export default function unbundle(options: UnbundleOptions = {}): UnbundlePlugin 
         request = rewrittenRequest.rewrite({ moduleId, importerId });
       }
 
-      const resolution = await this.resolve(moduleId, importerId, {
-        ...options,
-        skipSelf: true, // Prevent recurrent requests with the same `moduleId` and `importerId`.
-        custom: { ...custom, unbundle: request },
-      });
+      const resolution = await next(moduleId);
 
       if (!resolution) {
         // Other plugins failed to resolve ID.
@@ -100,104 +107,106 @@ export default function unbundle(options: UnbundleOptions = {}): UnbundlePlugin 
 
       const pluginResolution = await resolveModuleId(request);
 
-      if (
-        pluginResolution
-        && (pluginResolution.id !== resolution.id
-          || (!resolution.external && pluginResolution.external))
-      ) {
+      if (pluginResolution && !resolution.external && pluginResolution.external) {
+        // Replace non-external resolution with external one.
         return pluginResolution;
       }
 
       return resolution;
+
+      async function resolveModuleId(request: Unbundle$Request): Promise<UnbundleResult> {
+        const dependency = await request.resolveDependency();
+        const result = dependency
+          ? await resolveDependencyId(request, dependency)
+          : await resolveUnknownId(request);
+
+        if (result != null) {
+          return (
+            result && {
+              ...result,
+              meta: {
+                unbundle: result.meta?.unbundle ?? request,
+              },
+            }
+          );
+        }
+
+        // External module without ID?
+        return (await detectExternal(request)) ? false : undefined;
+      }
+
+      async function resolveUnknownId(request: Unbundle$Request): Promise<UnbundleResult> {
+        const on = await request.resolveModule();
+
+        if (on.importSpec.kind === 'uri' && (await detectExternal(request))) {
+          // Resolve external URI.
+          return {
+            id: on.uri,
+            external: true,
+            moduleSideEffects: await request.hasSideEffects(),
+          };
+        }
+
+        return await resolveSubPackageId(request, on);
+      }
+
+      async function resolveDependencyId(
+        request: Unbundle$Request,
+        { kind, on }: ImportDependency,
+      ): Promise<UnbundleResult> {
+        switch (kind) {
+          case 'synthetic':
+            // Can not decide for synthetic imports.
+            break;
+          case 'implied':
+            return await resolveImpliedId(request, on);
+          case 'dev':
+          case 'peer':
+          case 'runtime':
+          case 'self':
+            return await resolveSubPackageId(request, on);
+        }
+      }
+
+      async function resolveSubPackageId(
+        request: Unbundle$Request,
+        on: ImportResolution,
+      ): Promise<UnbundleResult> {
+        const subPackage = on.asSubPackage();
+
+        if (subPackage) {
+          const { importSpec } = subPackage;
+
+          if (await detectExternal(request)) {
+            return {
+              id: importSpec.spec,
+              external: true,
+              moduleSideEffects: await request.hasSideEffects(),
+            };
+          }
+
+          const deref = subPackage.deref().asSubPackage();
+
+          if (deref?.importSpec.kind === 'path') {
+            if (resolvePath) {
+              // Recurrently requested path resolution.
+              return {
+                id: request.moduleId,
+                external: await detectExternal(request),
+                moduleSideEffects: await request.hasSideEffects(),
+              };
+            }
+
+            // Recurrently request path resolution.
+            return await next(uriToPath(deref.uri), { resolvePath: true });
+          }
+        }
+      }
     },
   };
 
   async function detectExternal(request: Unbundle$Request): Promise<boolean> {
     return (await isExternal?.(request)) ?? (await request.isExternal()) ?? false;
-  }
-
-  async function resolveModuleId(request: Unbundle$Request): Promise<UnbundleResult> {
-    const dependency = await request.resolveDependency();
-    const result = dependency
-      ? await resolveDependencyId(request, dependency)
-      : await resolveUnknownId(request);
-
-    if (result != null) {
-      return result && { ...result, meta: { unbundle: request } };
-    }
-
-    // External module without ID?
-    return (await detectExternal(request)) ? false : undefined;
-  }
-
-  async function resolveUnknownId(request: Unbundle$Request): Promise<UnbundleResult> {
-    const resolvedModule = await request.resolveModule();
-
-    if (resolvedModule.importSpec.kind === 'uri' && (await detectExternal(request))) {
-      // Resolve external URI.
-      return {
-        id: resolvedModule.uri,
-        external: true,
-        moduleSideEffects: await request.hasSideEffects(),
-      };
-    }
-  }
-
-  async function resolveDependencyId(
-    request: Unbundle$Request,
-    { kind, on }: ImportDependency,
-  ): Promise<UnbundleResult> {
-    switch (kind) {
-      case 'synthetic':
-        // Can not decide for synthetic imports.
-        break;
-      case 'implied':
-        return await resolveImpliedId(request, on);
-      case 'dev':
-      case 'peer':
-      case 'runtime':
-        return await resolveSubPackageId(request, on);
-      case 'self':
-        return await resolveSelfId(request, on);
-    }
-  }
-
-  async function resolveSelfId(
-    request: Unbundle$Request,
-    on: ImportResolution,
-  ): Promise<UnbundleResult> {
-    const self = on.asSubPackage()!;
-
-    if (self && (await detectExternal(request))) {
-      const { importSpec } = self;
-
-      return {
-        id: importSpec.spec,
-        external: true,
-        moduleSideEffects: await request.hasSideEffects(),
-      };
-    }
-  }
-
-  async function resolveSubPackageId(
-    request: Unbundle$Request,
-    on: SubPackageResolution,
-  ): Promise<UnbundleResult> {
-    const subPackage = on.asSubPackage();
-
-    if (subPackage) {
-      const { importSpec } = subPackage;
-
-      if (await detectExternal(request)) {
-        return {
-          id: importSpec.spec,
-          external: true,
-          moduleSideEffects: await request.hasSideEffects(),
-        };
-      }
-
-      // TODO Unwrap to file path?
-    }
   }
 
   async function resolveImpliedId(
@@ -220,7 +229,10 @@ export interface UnbundlePlugin extends Plugin {
 }
 
 interface CustomUnbundleOptions extends CustomPluginOptions {
-  unbundle?: Unbundle$Request | undefined;
+  unbundle?: {
+    readonly request: Unbundle$Request;
+    readonly resolvePath: boolean;
+  };
 }
 
-type UnbundleResult = Exclude<ResolveIdResult, string | null>;
+type UnbundleResult = Exclude<ResolveIdResult, string>;
