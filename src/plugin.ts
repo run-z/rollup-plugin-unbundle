@@ -48,9 +48,7 @@ export default function unbundle(options: UnbundleOptions = {}): UnbundlePlugin 
       moduleId: string,
       importerId: string | undefined,
       options: {
-        assertions: Record<string, string>;
         custom?: CustomUnbundleOptions | undefined;
-        isEntry: boolean;
       },
     ): Promise<ResolveIdResult> {
       const { custom = {} } = options;

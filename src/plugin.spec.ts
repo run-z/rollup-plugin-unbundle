@@ -301,7 +301,7 @@ describe('unbundle', () => {
 
       expect(result).toEqual({
         id: 'dep',
-        assertions: {},
+        attributes: {},
         external: true,
         moduleSideEffects: false,
         syntheticNamedExports: false,
@@ -373,7 +373,7 @@ describe('unbundle', () => {
         id: 'dep',
         external: true,
         moduleSideEffects: false,
-        assertions: {},
+        attributes: {},
         meta: {
           unbundle: expect.any(Unbundle$Request),
         },
@@ -478,7 +478,7 @@ describe('unbundle', () => {
     moduleId: string,
     importerId?: string,
     options: {
-      assertions?: Record<string, string> | undefined;
+      attributes?: Record<string, string> | undefined;
       custom?: CustomPluginOptions | undefined;
       isEntry?: boolean | undefined;
     } = {},
@@ -489,11 +489,11 @@ describe('unbundle', () => {
 
     alreadyResolved.add(moduleId);
 
-    const { assertions = {}, isEntry = true } = options;
+    const { attributes = {}, isEntry = true } = options;
 
     return await plugin.resolveId.call(context, moduleId, importerId, {
       ...options,
-      assertions,
+      attributes,
       isEntry,
     });
   }
@@ -513,12 +513,12 @@ describe('unbundle', () => {
   function buildResolution(
     result: ResolveIdResult,
     options: {
-      assertions?: Record<string, string> | undefined;
+      attributes?: Record<string, string> | undefined;
       custom?: CustomPluginOptions | undefined;
       isEntry?: boolean | undefined;
     } = {},
   ): ResolvedId | null {
-    const { assertions = {}, custom } = options;
+    const { attributes = {}, custom } = options;
 
     if (!result) {
       return null;
@@ -535,7 +535,7 @@ describe('unbundle', () => {
       ...result,
       external: !!external,
       resolvedBy,
-      assertions,
+      attributes,
       meta: { ...custom, ...result.meta },
       moduleSideEffects: moduleSideEffects ?? false,
       syntheticNamedExports: false,
