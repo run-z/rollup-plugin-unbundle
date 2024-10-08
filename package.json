@@ -37,11 +37,11 @@
   },
   "dependencies": {
     "@run-z/npk": "^0.6.0",
-    "minimatch": "^9.0.5"
+    "minimatch": "^10.0.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
-    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/plugin-typescript": "^12.1.0",
     "@run-z/eslint-config": "^4.2.0",
     "@run-z/prettier-config": "^2.0.0",
     "@types/node": "^20.16.11",
