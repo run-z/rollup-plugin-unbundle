@@ -388,7 +388,8 @@ describe('unbundle', () => {
       expect(request.importerId).toBe('package:another-importer/1.0.0');
     });
     it('resolves externalized self-reference', async () => {
-      isExternal = async request => (await request.resolveModule()).asSubPackage()?.importSpec.spec === '#private';
+      isExternal = async request =>
+        (await request.resolveModule()).asSubPackage()?.importSpec.spec === '#private';
 
       const result = (await resolve('#private')) as ResolvedId;
 

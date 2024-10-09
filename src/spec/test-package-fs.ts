@@ -3,7 +3,6 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export class TestPackageFS extends VirtualPackageFS {
-
   static async create(root?: string): Promise<TestPackageFS> {
     return new TestPackageFS(root, await NodePackageFS.create());
   }
@@ -55,5 +54,4 @@ export class TestPackageFS extends VirtualPackageFS {
 
     return `package:${uri.slice(root.length)}`;
   }
-
 }

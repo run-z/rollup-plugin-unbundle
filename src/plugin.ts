@@ -62,7 +62,8 @@ export default function unbundle(options: UnbundleOptions = {}): UnbundlePlugin 
         }: {
           readonly resolvePath?: boolean | undefined;
         } = {},
-      ): Promise<ResolvedId | null> => await this.resolve(moduleId, importerId, {
+      ): Promise<ResolvedId | null> =>
+        await this.resolve(moduleId, importerId, {
           ...options,
           skipSelf: !resolvePath, // Prevent recurrent requests with the same `moduleId` and `importerId`.
           custom: { ...custom, unbundle: { request, resolvePath } },

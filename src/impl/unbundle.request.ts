@@ -3,7 +3,6 @@ import type { UnbundleRequest } from '../unbundle-request.js';
 import { moduleHasSideEffects } from './module-has-side-effects.js';
 
 export class Unbundle$Request implements UnbundleRequest {
-
   readonly #resolutionRoot: ImportResolution;
   readonly #moduleId: string;
   readonly #prevRequest: Unbundle$Request | undefined;
@@ -160,5 +159,4 @@ export class Unbundle$Request implements UnbundleRequest {
       prevRequest: this.importerId === importerId ? this : undefined,
     });
   }
-
 }
